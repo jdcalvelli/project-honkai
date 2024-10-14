@@ -1,8 +1,5 @@
-use states::PlayerState;
-
 mod states;
 mod server_funcs;
-mod commands;
 
 turbo::cfg! {r#"
     name = "project-honkai"
@@ -20,8 +17,6 @@ turbo::init! {
     // something only the player will see? menus, interpolated values, etc, local ui state eg, tweens, transitions, etc
     // dont need to round trip with the server at all!
     struct LocalState {
-        player_state: states::PlayerState,
-        global_state: states::GlobalState,
     } = {
         Self::new()
     }
@@ -30,10 +25,6 @@ turbo::init! {
 impl LocalState {
     fn new() -> Self {
         Self {
-            // need to get the player's state if it exists, otherwise create and send
-            player_state: states::PlayerState::load_remote(),
-            // similarly, need to get the global state if it exists, otherwise create and send
-            global_state: states::GlobalState::new()
         }
     }
 }
@@ -41,26 +32,34 @@ impl LocalState {
 turbo::go! ({
     let mut local_state = LocalState::load();
 
-    let [canvas_width, canvas_height] = canvas_size!();
-
     // get user id
-    // let user_id = os::user_id().unwrap_or("NO ID".to_string());
+    let this_user_id = os::user_id().unwrap();
 
-    let mut player_state = states::PlayerState::load_remote();
+    // get remote data result for this user
+    let this_player_remote_data = os::read_file("project_honkai", &format!("players/{this_user_id}"));
 
-    // input logic
-    if gamepad(0).start.just_pressed() {
-        PlayerState::exec_increment_xp();
+    // INSIDE OF HERE, BASICALLY, IS THE LOCAL DRAWS
+    match this_player_remote_data {
+        Ok(file) => {
+            // log!("DATA THERE");
+            let this_player_state = states::PlayerState::try_from_slice(&file.contents).unwrap();
 
-        // if local_state.player_state.get_xp() % 10 == 0 && local_state.player_state.get_xp() != 0 {
-        //     local_state.global_state.increment_total();
-        // }
+            // draws
+            let [canvas_width, canvas_height] = canvas_size!();
+
+            text!(&this_player_state.xp.to_string(), x = canvas_width / 2, y = canvas_height / 2);
+
+            // inputs
+            if gamepad(0).start.just_pressed() {
+                os::exec("project_honkai", "increment_player_xp", &[]);
+            }
+        },
+        Err(_err) => {
+            // log!("DATA NOT THERE");
+            // we need to make a player file for u on the server
+            os::exec("project_honkai", "create_player_data", &[]);
+        }
     }
-
-    // draws
-    text!(&player_state.get_xp().to_string(), x = canvas_width / 2, y = canvas_height / 2);
-    // text!(&local_state.global_state.get_total().to_string(), x = canvas_width / 2, y = canvas_height / 2 + 16);
-    // text!(&format!("{user_id}"), x = canvas_width / 2, y = canvas_height / 2 + 32);
 
     local_state.save();
 });
