@@ -17,6 +17,7 @@ turbo::init! {
     // something only the player will see? menus, interpolated values, etc, local ui state eg, tweens, transitions, etc
     // dont need to round trip with the server at all!
     struct LocalState {
+        egghead_state: bool,
     } = {
         Self::new()
     }
@@ -25,6 +26,7 @@ turbo::init! {
 impl LocalState {
     fn new() -> Self {
         Self {
+            egghead_state: false
         }
     }
 }
@@ -47,11 +49,32 @@ turbo::go! ({
             // draws
             let [canvas_width, canvas_height] = canvas_size!();
 
-            text!(&this_player_state.xp.to_string(), x = canvas_width / 2, y = canvas_height / 2);
+            // background
+            sprite!("background_layer", x = 0, y = 0);
+
+            // foreground
+            match local_state.egghead_state {
+                true => {
+                    sprite!("anim_egghead_press", x = 0, y = 0);
+                },
+                false => {
+                    sprite!("anim_egghead_release", x = 0, y = 0);
+                },
+            }
+
+            // very foreground
+            sprite!("outerframe_layer", x = 0, y = 0);
+
+            // testing
+            text!(&this_player_state.xp.to_string(), x = canvas_width / 2, y = canvas_height / 2, color = 0x000000ff);
 
             // inputs
             if gamepad(0).start.just_pressed() {
+                local_state.egghead_state = true;
                 os::exec("project_honkai", "increment_player_xp", &[]);
+            }
+            else if gamepad(0).start.just_released() {
+                local_state.egghead_state = false;
             }
         },
         Err(_err) => {
