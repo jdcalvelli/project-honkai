@@ -9,8 +9,8 @@ unsafe extern "C" fn on_create_player_data() -> usize {
 	let remote_data = program::read_file(&format!("players/{user_id}"));
 
 	match remote_data {
-		Ok(_file) => {
-			// if there is a file there already, then cancel the creation of the info
+		Ok(_data) => {
+			// if there is data there already, then cancel the creation of the info
 			program::CANCEL
 		},
 		Err(_err) => {
@@ -21,12 +21,13 @@ unsafe extern "C" fn on_create_player_data() -> usize {
 			let result = program::write_file(&format!("players/{user_id}"), &current_player_state.try_to_vec().unwrap());
 
 			match result {
-				Ok(_data) => {
+				Ok(_) => {
 					// commit the change if theres no issue in the write
 					program::COMMIT
 				}
-				Err(_err) => {
+				Err(err) => {
 					// cancel the change if there is an error in the write
+					program::log(err);
 					program::CANCEL
 				}
 			}

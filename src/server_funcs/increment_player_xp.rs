@@ -13,30 +13,30 @@ unsafe extern "C" fn on_increment_player_xp() -> usize {
 
 	// check based on result what we should do next
 	match remote_data {
-		Ok(file) => {
+		Ok(data) => {
 			// if data exists, deserialize the struct and set holder to it
-			current_player_state = states::PlayerState::try_from_slice(&file).unwrap();
+			current_player_state = states::PlayerState::try_from_slice(&data).unwrap();
 
 			// this is the increase!
-			current_player_state.xp += 1;
+			current_player_state.current_xp += 1;
 
 			// write the data to the file
 			let result = program::write_file(&format!("players/{user_id}"), &current_player_state.try_to_vec().unwrap());
 
 			match result {
-				Ok(_data) => {
+				Ok(_) => {
 					// commit the change if theres no issue writing data
 					program::COMMIT
 				}
-				Err(_err) => {
+				Err(err) => {
 					// cancel the change if there is an error in writing for some reason
+					program::log(err);
 					program::CANCEL
 				}
 			}
 		},
 		Err(_err) => {
 			// if there is no remote data, cancel the execution
-			//current_player_state = states::PlayerState::new();
 			program::CANCEL
 
 		},

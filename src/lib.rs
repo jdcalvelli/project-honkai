@@ -41,13 +41,19 @@ turbo::go! ({
     // get remote data result for this user
     let this_player_remote_data = os::read_file("project_honkai", &format!("players/{this_user_id}"));
 
-    // INSIDE OF HERE, BASICALLY, IS THE LOCAL DRAWS
+    // INSIDE OF HERE, BASICALLY, IS POST US GETTING THE PLAYER
     match this_player_remote_data {
         Ok(file) => {
-            // log!("DATA THERE");
+
+            // *** UPDATE *** //
+
             let this_player_state = states::PlayerState::try_from_slice(&file.contents).unwrap();
 
-            // draws
+            if this_player_state.current_xp == this_player_state.xp_needed_for_next_level {
+                os::exec("project_honkai", "level_up_player", &[]);
+            }
+
+            // *** DRAW *** //
 
             // background
             sprite!("background_layer", x = 0, y = 0);
@@ -58,7 +64,17 @@ turbo::go! ({
 
             // rect overlay
             // interpolate btw player xp to 215 always - need something like the map() function in processing
-            rect!(x = 86, y = 88, w = utils::range_map(this_player_state.xp as f64, 0., 10., 0., 215.), h = 6, color = 0xff0000ff);
+            rect!(
+                x = 86, 
+                y = 88, 
+                w = utils::range_map(
+                    this_player_state.current_xp as f64, 
+                    this_player_state.xp_needed_for_prev_level as f64, 
+                    this_player_state.xp_needed_for_next_level as f64, 
+                    0., 
+                    215.),
+                h = 6, color = 0xff0000ff
+            );
 
             // foreground
             match local_state.egghead_state {
@@ -74,10 +90,13 @@ turbo::go! ({
             sprite!("outerframe_layer", x = 0, y = 0);
 
             // testing
-            // let [canvas_width, canvas_height] = canvas_size!();
-            //text!(&this_player_state.xp.to_string(), x = canvas_width / 2, y = canvas_height / 2, color = 0x000000ff);
+            text!(&this_player_state.current_level.to_string(), x = 100, y = 100, color = 0x000000ff);
+            text!(&this_player_state.current_xp.to_string(), x = 100, y = 110, color = 0x000000ff);
+            text!(&this_player_state.xp_needed_for_prev_level.to_string(), x = 100, y = 120, color = 0x000000ff);
+            text!(&this_player_state.xp_needed_for_next_level.to_string(), x = 100, y = 130, color = 0x000000ff);
 
-            // inputs
+            // *** INPUT *** //
+
             if gamepad(0).start.just_pressed() {
                 local_state.egghead_state = true;
                 os::exec("project_honkai", "increment_player_xp", &[]);
