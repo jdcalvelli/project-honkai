@@ -1,3 +1,4 @@
+mod utils;
 mod states;
 mod server_funcs;
 
@@ -47,10 +48,17 @@ turbo::go! ({
             let this_player_state = states::PlayerState::try_from_slice(&file.contents).unwrap();
 
             // draws
-            let [canvas_width, canvas_height] = canvas_size!();
 
             // background
             sprite!("background_layer", x = 0, y = 0);
+
+            // ui
+            sprite!("ui_faction_bar", x = 38, y = 21);
+            sprite!("ui_bp_bar", x = 39, y = 65);
+
+            // rect overlay
+            // interpolate btw player xp to 215 always - need something like the map() function in processing
+            rect!(x = 86, y = 88, w = utils::range_map(this_player_state.xp as f64, 0., 10., 0., 215.), h = 6, color = 0xff0000ff);
 
             // foreground
             match local_state.egghead_state {
@@ -66,7 +74,8 @@ turbo::go! ({
             sprite!("outerframe_layer", x = 0, y = 0);
 
             // testing
-            text!(&this_player_state.xp.to_string(), x = canvas_width / 2, y = canvas_height / 2, color = 0x000000ff);
+            // let [canvas_width, canvas_height] = canvas_size!();
+            //text!(&this_player_state.xp.to_string(), x = canvas_width / 2, y = canvas_height / 2, color = 0x000000ff);
 
             // inputs
             if gamepad(0).start.just_pressed() {
