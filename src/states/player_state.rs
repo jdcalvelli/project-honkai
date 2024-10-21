@@ -2,6 +2,7 @@ use crate::*;
 
 #[derive(Debug, Clone, PartialEq, BorshDeserialize, BorshSerialize)]
 pub struct PlayerState {
+	pub faction: String,
 	pub current_level: u64,
 	pub current_xp: u64,
 	pub xp_needed_for_prev_level: u64,
@@ -11,6 +12,7 @@ pub struct PlayerState {
 impl PlayerState {
 	pub fn new() -> Self {
 		Self {
+			faction: "none".to_string(),
 			current_level: 0,
 			current_xp: 0,
 			xp_needed_for_prev_level: 0,
