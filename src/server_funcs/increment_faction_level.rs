@@ -5,19 +5,19 @@ use crate::*;
 #[export_name = "turbo/increment_faction_level"]
 unsafe extern "C" fn on_increment_faction_level() -> usize {
 	// get the player's faction from the function data
-	let function_data = program::get_input_data();
+	let function_input = program::get_input_data();
 
 	// translate function data to string
-	let function_data_as_string = String::from_utf8(function_data);
+	let function_input_as_string = String::from_utf8(function_input);
 
-	match function_data_as_string {
+	match function_input_as_string {
 		Ok(faction_string) => {
 			// should prob have some sort of check that the string is sanitized
 
 			// read the state of the current faction file
-			let remote_data = program::read_file(&format!("factions/{faction_string}"));
+			let read_data = program::read_file(&format!("factions/{faction_string}"));
 
-			match remote_data {
+			match read_data {
 				Ok(data) => {
 					// if the remote data exists, deserialize
 					let mut current_faction_deserialized = states::FactionState::try_from_slice(&data).unwrap();
@@ -41,7 +41,7 @@ unsafe extern "C" fn on_increment_faction_level() -> usize {
 
 				},
 				Err(err) => {
-					// if there is no remote data for some reason, cancel
+					// if there is no read data for some reason, cancel
 					program::log(err);
 					program::CANCEL
 				}

@@ -4,26 +4,24 @@ use crate::*;
 unsafe extern "C" fn on_increment_player_xp() -> usize {
 	// get the user id
 	let user_id = program::get_user_id();
-	
-	// create holder for player state
-	let mut current_player_state: states::PlayerState;
 
 	// try to read player state data from file, which returns Result
-	let remote_data = program::read_file(&format!("players/{user_id}"));
+	let read_result = program::read_file(&format!("players/{user_id}"));
 
 	// check based on result what we should do next
-	match remote_data {
+	match read_result {
 		Ok(data) => {
 			// if data exists, deserialize the struct and set holder to it
-			current_player_state = states::PlayerState::try_from_slice(&data).unwrap();
+			let mut current_player_deserialized = states::PlayerState::try_from_slice(&data).unwrap();
 
 			// this is the increase!
-			current_player_state.current_xp += 1;
+			current_player_deserialized.current_xp += 1;
 
 			// write the data to the file
-			let result = program::write_file(&format!("players/{user_id}"), &current_player_state.try_to_vec().unwrap());
+			let write_result = program::write_file(&format!("players/{user_id}"), 
+				&current_player_deserialized.try_to_vec().unwrap());
 
-			match result {
+			match write_result {
 				Ok(_) => {
 					// commit the change if theres no issue writing data
 					program::COMMIT
@@ -36,7 +34,7 @@ unsafe extern "C" fn on_increment_player_xp() -> usize {
 			}
 		},
 		Err(_err) => {
-			// if there is no remote data, cancel the execution
+			// if there is no read data, cancel the execution
 			program::CANCEL
 
 		},
