@@ -26,7 +26,8 @@ unsafe extern "C" fn on_create_player_data() -> usize {
 					// i might want to put another match statement in here to make sure the right string came through
 					current_player_state.faction = faction_string;
 					// write the new data to the file
-					let result = program::write_file(&format!("players/{user_id}"), &current_player_state.try_to_vec().unwrap());
+					let result = program::write_file(&format!("players/{user_id}"), 
+						&current_player_state.try_to_vec().unwrap());
 
 					match result {
 						Ok(_) => {
