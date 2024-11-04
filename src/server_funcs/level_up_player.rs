@@ -3,10 +3,10 @@ use crate::*;
 #[export_name = "turbo/level_up_player"]
 unsafe extern "C" fn on_level_up_player() -> usize {
 	// get the user id
-	let user_id = program::get_user_id();
+	let user_id = os::server::get_user_id();
 
 	// try to read player state data from file, which returns a result
-	let read_result = program::read_file(&format!("players/{user_id}"));
+	let read_result = os::server::read_file(&format!("players/{user_id}"));
 
 	// check based on result next steps
 	match read_result {
@@ -24,25 +24,25 @@ unsafe extern "C" fn on_level_up_player() -> usize {
 			current_player_deserialized.xp_needed_for_next_level = (current_player_deserialized.current_level + 1).pow(3) + 5;
 
 			// now we write the new state, get a result option
-			let write_result = program::write_file(&format!("players/{user_id}"), 
+			let write_result = os::server::write_file(&format!("players/{user_id}"), 
 				&current_player_deserialized.try_to_vec().unwrap());
 
 			// check based on result opt
 			match write_result {
 				Ok(_) => {
 					// commit the change if theres no write error
-					program::COMMIT
+					os::server::COMMIT
 				},
 				Err(err) => {
 					// cancel the change if there is a write error
-					program::log(err);
-					program::CANCEL
+					os::server::log(&err.to_string());
+					os::server::CANCEL
 				}
 			}
 		},
 		Err(_err) => {
 			// if there is no remote data, cancel execution
-			program::CANCEL
+			os::server::CANCEL
 		}
 	}
 }

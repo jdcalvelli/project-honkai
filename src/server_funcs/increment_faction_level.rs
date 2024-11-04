@@ -5,7 +5,7 @@ use crate::*;
 #[export_name = "turbo/increment_faction_level"]
 unsafe extern "C" fn on_increment_faction_level() -> usize {
 	// get the player's faction from the function data
-	let function_input = program::get_input_data();
+	let function_input = os::server::get_command_data();
 
 	// translate function data to string
 	let function_input_as_string = String::from_utf8(function_input);
@@ -15,7 +15,7 @@ unsafe extern "C" fn on_increment_faction_level() -> usize {
 			// should prob have some sort of check that the string is sanitized
 
 			// read the state of the current faction file
-			let read_data = program::read_file(&format!("factions/{faction_string}"));
+			let read_data = os::server::read_file(&format!("factions/{faction_string}"));
 
 			match read_data {
 				Ok(data) => {
@@ -24,32 +24,32 @@ unsafe extern "C" fn on_increment_faction_level() -> usize {
 					current_faction_deserialized.current_level += 1;
 
 					// write the update to file
-					let write_result = program::write_file(&format!("factions/{faction_string}"), 
+					let write_result = os::server::write_file(&format!("factions/{faction_string}"), 
 						&current_faction_deserialized.try_to_vec().unwrap());
 
 					match write_result {
 						Ok(_) => {
 							// no write error, so commit
-							program::COMMIT
+							os::server::COMMIT
 						},
 						Err(err) => {
 							// write error, log and cancel
-							program::log(err);
-							program::CANCEL
+							os::server::log(&err.to_string());
+							os::server::CANCEL
 						}
 					}
 
 				},
 				Err(err) => {
 					// if there is no read data for some reason, cancel
-					program::log(err);
-					program::CANCEL
+					os::server::log(&err.to_string());
+					os::server::CANCEL
 				}
 			}
 		},
 		Err(_) => {
 			// the data passed through was not valid utf8
-			program::CANCEL
+			os::server::CANCEL
 		}
 	}
 }

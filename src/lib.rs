@@ -38,9 +38,9 @@ turbo::go! ({
     let mut local_state = LocalState::load();
 
     // get user id, for use across scenes
-    let this_user_id = os::user_id().unwrap();
+    let this_user_id = os::client::user_id().unwrap();
     // get remote data result for this user, for use across scenes
-    let this_player_remote_data = os::read_file("project_honkai", &format!("players/{this_user_id}"));
+    let this_player_remote_data = os::client::read_file("project_honkai", &format!("players/{this_user_id}"));
 
     // add local game scene check
     match local_state.game_scene {
@@ -62,29 +62,29 @@ turbo::go! ({
 
                     // *** INPUT *** //
 
-                    if gamepad(0).a.just_pressed() {
+                    if gamepad(0).left.just_pressed() {
                         // create player of circle faction
-                        os::exec("project_honkai", "create_player_data", "circle".as_bytes());
+                        os::client::exec("project_honkai", "create_player_data", "circle".as_bytes());
                         // also create all the factions if not created
-                        os::exec("project_honkai", "create_faction_data", "circle".as_bytes());
-                        os::exec("project_honkai", "create_faction_data", "square".as_bytes());
-                        os::exec("project_honkai", "create_faction_data", "triangle".as_bytes());
+                        os::client::exec("project_honkai", "create_faction_data", "circle".as_bytes());
+                        os::client::exec("project_honkai", "create_faction_data", "square".as_bytes());
+                        os::client::exec("project_honkai", "create_faction_data", "triangle".as_bytes());
                     }
-                    else if gamepad(0).b.just_pressed() {
+                    else if gamepad(0).up.just_pressed() {
                         // create player of square faction
-                        os::exec("project_honkai", "create_player_data", "square".as_bytes());
+                        os::client::exec("project_honkai", "create_player_data", "square".as_bytes());
                         // also create all the factions if not created
-                        os::exec("project_honkai", "create_faction_data", "circle".as_bytes());
-                        os::exec("project_honkai", "create_faction_data", "square".as_bytes());
-                        os::exec("project_honkai", "create_faction_data", "triangle".as_bytes());
+                        os::client::exec("project_honkai", "create_faction_data", "circle".as_bytes());
+                        os::client::exec("project_honkai", "create_faction_data", "square".as_bytes());
+                        os::client::exec("project_honkai", "create_faction_data", "triangle".as_bytes());
                     }
-                    else if gamepad(0).x.just_pressed() {
+                    else if gamepad(0).right.just_pressed() {
                         // create player of triangle faction
-                        os::exec("project_honkai", "create_player_data", "triangle".as_bytes());
+                        os::client::exec("project_honkai", "create_player_data", "triangle".as_bytes());
                         // also create all the factions if not created
-                        os::exec("project_honkai", "create_faction_data", "circle".as_bytes());
-                        os::exec("project_honkai", "create_faction_data", "square".as_bytes());
-                        os::exec("project_honkai", "create_faction_data", "triangle".as_bytes());
+                        os::client::exec("project_honkai", "create_faction_data", "circle".as_bytes());
+                        os::client::exec("project_honkai", "create_faction_data", "square".as_bytes());
+                        os::client::exec("project_honkai", "create_faction_data", "triangle".as_bytes());
                     }
                 }
             }
@@ -101,19 +101,19 @@ turbo::go! ({
                     // *** UPDATE *** //
 
                     // now we want to get all of the faction states
-                    let circle_faction_remote_data = os::read_file("project_honkai", "factions/circle");
+                    let circle_faction_remote_data = os::client::read_file("project_honkai", "factions/circle");
                     let circle_faction_deserialized: states::FactionState;
                     match circle_faction_remote_data {
                         Ok(file) => circle_faction_deserialized = states::FactionState::try_from_slice(&file.contents).unwrap(),
                         Err(_) => return,
                     }
-                    let square_faction_remote_data = os::read_file("project_honkai", "factions/square");
+                    let square_faction_remote_data = os::client::read_file("project_honkai", "factions/square");
                     let square_faction_deserialized: states::FactionState;
                     match square_faction_remote_data {
                         Ok(file) => square_faction_deserialized = states::FactionState::try_from_slice(&file.contents).unwrap(),
                         Err(_) => return,
                     }
-                    let triangle_faction_remote_data = os::read_file("project_honkai", "factions/triangle");
+                    let triangle_faction_remote_data = os::client::read_file("project_honkai", "factions/triangle");
                     let triangle_faction_deserialized: states::FactionState;
                     match triangle_faction_remote_data {
                         Ok(file) => triangle_faction_deserialized = states::FactionState::try_from_slice(&file.contents).unwrap(),
@@ -175,16 +175,16 @@ turbo::go! ({
 
                     if gamepad(0).start.just_pressed() {
                         local_state.egghead_state = true;
-                        os::exec("project_honkai", "increment_player_xp", &[]);
+                        os::client::exec("project_honkai", "increment_player_xp", &[]);
                     }
                     else if gamepad(0).start.just_released() {
                         local_state.egghead_state = false;
 
                         if this_player_state.current_xp == this_player_state.xp_needed_for_next_level {
                             // also increment the faction score of the player!
-                            os::exec("project_honkai", "increment_faction_level", this_player_state.faction.as_bytes());
+                            os::client::exec("project_honkai", "increment_faction_level", this_player_state.faction.as_bytes());
                             // level up the player
-                            os::exec("project_honkai", "level_up_player", &[]);
+                            os::client::exec("project_honkai", "level_up_player", &[]);
                         }
 
                     }
