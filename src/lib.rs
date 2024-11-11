@@ -351,8 +351,13 @@ turbo::go! ({
                         7 => sprite!("ui_lvl_num_7", x = 56, y = 78),
                         8 => sprite!("ui_lvl_num_8", x = 56, y = 78),
                         9 => sprite!("ui_lvl_num_9", x = 55, y = 78),
-                        10 => {/* do nothing bc its just a hold for the tier up*/},
-                        _ => panic!("cant have level in tier higher than 9"),
+                        _ => {
+                            // if we're on max tier, display infinity
+                            if player_state_deserialized.current_tier == 9 {
+                                sprite!("ui_lvl_num_infinite", x = 52, y = 82);
+                            }
+                            // if we are not on max tier do nothing so we can pass forward
+                        }
                     }
 
                     // button press rect overlay
