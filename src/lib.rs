@@ -129,6 +129,7 @@ turbo::go! ({
                     if player_state_deserialized.current_level_in_tier == 10 && player_state_deserialized.current_tier != 9 {
                         os::client::exec("project_honkai", "tier_up_player", &[]);
                         // NEED TO FIGURE OUT WHAT HAPPENS WHEN SOMEONE GETS TO MAX TIER MAX LEVEL
+                        // infinity symbol at the bottom lol
                     }
 
 
@@ -296,19 +297,19 @@ turbo::go! ({
                     // tier related (draw both the block and the question mark circle)
                     match player_state_deserialized.current_tier {
                         0 => {
-                            sprite!("ui_tier_00_free", x = 42, y = 68);
+                            sprite!("ui_tier_00_free", x = 42, y = 70);
                             sprite!("ui_qm_00_free", x = 304, y = 71);
                         },
                         1 => {
-                            sprite!("ui_tier_01_basic", x = 42, y = 68);
+                            sprite!("ui_tier_01_basic", x = 42, y = 70);
                             sprite!("ui_qm_01_basic", x = 304, y = 71);
                         },
                         2 => {
-                            sprite!("ui_tier_02_upgraded", x = 42, y = 68);
+                            sprite!("ui_tier_02_upgraded", x = 42, y = 70);
                             sprite!("ui_qm_02_upgraded", x = 304, y = 71);
                         },
                         3 => {
-                            sprite!("ui_tier_03_premium", x = 42, y = 68);
+                            sprite!("ui_tier_03_premium", x = 42, y = 70);
                             sprite!("ui_qm_03_premium", x = 304, y = 71);
                         },
                         4 => {
@@ -332,7 +333,7 @@ turbo::go! ({
                             sprite!("ui_qm_08_mythic", x = 304, y = 71);
                         },
                         9 => {
-                            sprite!("ui_tier_09_derp", x = 42, y = 69);
+                            sprite!("ui_tier_09_derp", x = 42, y = 68);
                             sprite!("ui_qm_09_derp", x = 304, y = 71);
                         },
                         _ => panic!("cant have tier higher than 9"),
