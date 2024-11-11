@@ -16,12 +16,13 @@ unsafe extern "C" fn on_level_up_player() -> usize {
 
 			// now we can do whatever we want to the state
 			// first we increase player level!
-			current_player_deserialized.current_level += 1;
+			current_player_deserialized.current_level_in_tier += 1;
 			// then we need to set the prev needed level xp to whatever currently next needed level xp is
 			current_player_deserialized.xp_needed_for_prev_level = current_player_deserialized.xp_needed_for_next_level;
 			// then we calculate what the next level xp needs to be
-			// test purpose, just assume its new level + 1 to the 3th power + 5
-			current_player_deserialized.xp_needed_for_next_level = (current_player_deserialized.current_level + 1).pow(3) + 5;
+			// currently, the equation is new level + 1 to the 3th power + 5
+			current_player_deserialized.xp_needed_for_next_level = 
+				(current_player_deserialized.current_level_in_tier + 1).pow(1) + 5;
 
 			// now we write the new state, get a result option
 			let write_result = os::server::write_file(&format!("players/{user_id}"), 

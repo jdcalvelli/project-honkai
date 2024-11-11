@@ -10,7 +10,7 @@ impl FactionState {
 	pub fn new() -> Self {
 		Self {
 			current_level: 0,
-			max_level: 100,
+			max_level: 1000,
 		}
 	}
 }
