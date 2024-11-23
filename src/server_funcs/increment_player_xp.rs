@@ -17,6 +17,30 @@ unsafe extern "C" fn on_increment_player_xp() -> usize {
 			// this is the increase!
 			current_player_deserialized.current_xp += 1;
 
+			// if players xp is high enough, level up
+            if current_player_deserialized.current_xp == current_player_deserialized.xp_needed_for_next_level {
+				// first we increase player level!
+				current_player_deserialized.current_level_in_tier += 1;
+				// then we need to set the prev needed level xp to whatever currently next needed level xp is
+				current_player_deserialized.xp_needed_for_prev_level = current_player_deserialized.xp_needed_for_next_level;
+				// then we calculate what the next level xp needs to be
+				// currently, the equation is new level + 1 to the 3th power + 5
+				current_player_deserialized.xp_needed_for_next_level = 
+					(current_player_deserialized.current_level_in_tier + 1).pow(3) + 5;
+            }
+
+			// if the players tier is high enough to tier up, also tier up the player
+			if current_player_deserialized.current_level_in_tier == 10 && current_player_deserialized.current_tier != 9 {
+				// this is the tier up, so we need to increment tier, and return all else to zero?
+				current_player_deserialized.current_tier += 1;
+				current_player_deserialized.current_level_in_tier = 0;
+				current_player_deserialized.current_xp = 0;
+				current_player_deserialized.xp_needed_for_prev_level = 0;
+				// this 6 value is based on the current equation which can be found in player_state.rs
+				// assumption rn is that it will be the same xp curve regardless of tier
+				current_player_deserialized.xp_needed_for_next_level = 6;
+			}
+
 			// write the data to the file
 			let write_result = os::server::write_file(&format!("players/{user_id}"), 
 				&current_player_deserialized.try_to_vec().unwrap());

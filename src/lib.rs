@@ -1,3 +1,5 @@
+use states::FactionState;
+
 mod utils;
 mod states;
 mod server_funcs;
@@ -10,7 +12,7 @@ turbo::cfg! {r#"
     [settings]
     resolution = [384, 216]
     [turbo-os]
-    api-url = "http://localhost:8000"
+    api-url = "https://os.turbo.computer"
 "#}
 
 turbo::init! {
@@ -37,102 +39,70 @@ turbo::go! ({
     let mut local_state = LocalState::load();
 
     // get user id, for use across scenes
-    let this_user_id = os::client::user_id().unwrap();
+    let user_id = os::client::user_id().unwrap();
     // get remote data result for this user, for use across scenes
-    let this_player_remote_data = os::client::read_file("project_honkai", &format!("players/{this_user_id}"));
+    let player_file_option = os::client::read_file("project_honkai", &format!("players/{user_id}")).ok();
 
-    // add local game scene check
-    match local_state.game_scene {
-        0 => {
+    // LOGIC REWRITE TO FIX UNWRAP PROBLEM
 
-            // intro scene, pick faction?
+    // if there is no file
+    if player_file_option.is_none()
+    {
+        // create the player file with no faction
+        // should make an enum to not pass strings around ultimately
+        os::client::exec("project_honkai", "create_player_data", "none".as_bytes());
 
-            // check if there is player data,
-            match this_player_remote_data {
-                Ok(_file) => {
-                    // if so, advance to the next scene for now
-                    local_state.game_scene = 1;
+        // create the factions if they aren't already created
+        os::client::exec("project_honkai", "create_faction_data", "green".as_bytes());
+        os::client::exec("project_honkai", "create_faction_data", "orange".as_bytes());
+        os::client::exec("project_honkai", "create_faction_data", "purple".as_bytes());
 
-                },
-                Err(_err) => {
-                    // if not, we need to create a new player, then go to next scene
-                    // determine faction based on key press for now, then make a file for player on server
-                    // we need to make a player file for u on the server
+        // early return
+        local_state.save();
+        return;
+    }
+
+    // if there is a file, then we want to deserialize that file into its struct
+    let player_state_result = states::PlayerState::try_from_slice(&player_file_option.unwrap().contents).ok();
+
+    // now there is a file, but the faction is none
+    // so now we want to match on the game scene and the deserialized version of the player file
+
+    match (local_state.game_scene, player_state_result) {
+        (0, Some(_player_state_deserialized)) => {
 
 
+            text!("FACTION PICK SCENE", x = 50, y = 50);
+            // this is the pick a faction scene
 
-                    // *** INPUT *** //
+            // right now its just black and you have to select the right thing
 
-                    if gamepad(0).left.just_pressed() {
-                        // create player of circle faction
-                        os::client::exec("project_honkai", "create_player_data", "green".as_bytes());
-                        // also create all the factions if not created
-                        os::client::exec("project_honkai", "create_faction_data", "green".as_bytes());
-                        os::client::exec("project_honkai", "create_faction_data", "orange".as_bytes());
-                        os::client::exec("project_honkai", "create_faction_data", "purple".as_bytes());
-                    }
-                    else if gamepad(0).up.just_pressed() {
-                        // create player of square faction
-                        os::client::exec("project_honkai", "create_player_data", "orange".as_bytes());
-                        // also create all the factions if not created
-                        os::client::exec("project_honkai", "create_faction_data", "green".as_bytes());
-                        os::client::exec("project_honkai", "create_faction_data", "orange".as_bytes());
-                        os::client::exec("project_honkai", "create_faction_data", "purple".as_bytes());
-                    }
-                    else if gamepad(0).right.just_pressed() {
-                        // create player of triangle faction
-                        os::client::exec("project_honkai", "create_player_data", "purple".as_bytes());
-                        // also create all the factions if not created
-                        os::client::exec("project_honkai", "create_faction_data", "green".as_bytes());
-                        os::client::exec("project_honkai", "create_faction_data", "orange".as_bytes());
-                        os::client::exec("project_honkai", "create_faction_data", "purple".as_bytes());
-                    }
-                }
+            // *** INPUT *** //
+
+            if gamepad(0).left.just_pressed() {
+                // UPDATE CHARACTER FACTION SERVER COMMAND
+                os::client::exec("project_honkai", "update_player_faction", "green".as_bytes());
+                local_state.game_scene = 1;
+            }
+            else if gamepad(0).up.just_pressed() {
+                // UPDATE CHARACTER FACTION SERVER COMMAND
+                os::client::exec("project_honkai", "update_player_faction", "orange".as_bytes());
+                local_state.game_scene = 1;
+            }
+            else if gamepad(0).right.just_pressed() {
+                // UPDATE CHARACTER FACTION SERVER COMMAND
+                os::client::exec("project_honkai", "update_player_faction", "purple".as_bytes());
+                local_state.game_scene = 1;
             }
 
+            local_state.save();
         },
-        1 => {
+        (1, Some(player_state_deserialized)) => {
+            // this is the game scene
+            // give me the factions
 
-            // actual clicker game scene
-
-            // INSIDE OF HERE, BASICALLY, IS POST US GETTING THE PLAYER
-            match this_player_remote_data {
-                Ok(player_file) => {
-
-
-
-                    // *** UPDATE *** //
-
-                    // deserialize player state
-                    let player_state_deserialized = states::PlayerState::try_from_slice(&player_file.contents).unwrap();
-
-                    // now we want to get all of the faction states
-                    let green_faction_remote_data = os::client::read_file("project_honkai", "factions/green");
-                    let green_faction_deserialized: states::FactionState;
-                    match green_faction_remote_data {
-                        Ok(file) => green_faction_deserialized = states::FactionState::try_from_slice(&file.contents).unwrap(),
-                        Err(_) => return,
-                    };
-                    let orange_faction_remote_data = os::client::read_file("project_honkai", "factions/orange");
-                    let orange_faction_deserialized: states::FactionState;
-                    match orange_faction_remote_data {
-                        Ok(file) => orange_faction_deserialized = states::FactionState::try_from_slice(&file.contents).unwrap(),
-                        Err(_) => return,
-                    };
-                    let purple_faction_remote_data = os::client::read_file("project_honkai", "factions/purple");
-                    let purple_faction_deserialized: states::FactionState;
-                    match purple_faction_remote_data {
-                        Ok(file) => purple_faction_deserialized = states::FactionState::try_from_slice(&file.contents).unwrap(),
-                        Err(_) => return,
-                    };
-                    // this is for tier up immediacy, but i feel like this call should be elsewhere
-                    if player_state_deserialized.current_level_in_tier == 10 && player_state_deserialized.current_tier != 9 {
-                        os::client::exec("project_honkai", "tier_up_player", &[]);
-                        // NEED TO FIGURE OUT WHAT HAPPENS WHEN SOMEONE GETS TO MAX TIER MAX LEVEL
-                        // infinity symbol at the bottom lol
-                    }
-
-
+            match deserialize_factions() {
+                Some((green_faction_deserialized, orange_faction_deserialized, purple_faction_deserialized)) => {
 
                     // *** DRAW *** //
 
@@ -142,6 +112,7 @@ turbo::go! ({
                     // ui
                     sprite!("ui_faction_bar", x = 38, y = 21);
                     sprite!("ui_xp_bar", x = 39, y = 65);
+
                     // draw correct UI based on player faction
                     match player_state_deserialized.faction.as_str() {
                         "green" => {
@@ -287,7 +258,12 @@ turbo::go! ({
 
                             // purple faction card
                             sprite!("ui_faction_profile_purple", x = 272, y = 121);
-                        }
+                        },
+                        "none" => {
+                            // early return
+                            local_state.save();
+                            return;
+                        },
                         _ => {
                             panic!("a faction that doesn't exist?");
                         },
@@ -423,38 +399,51 @@ turbo::go! ({
                     // very foreground
                     sprite!("outerframe_layer", x = 0, y = 0);
 
-
-
                     // *** INPUT *** //
 
                     if gamepad(0).start.just_pressed() {
                         local_state.egghead_state = true;
-                        os::client::exec("project_honkai", "increment_player_xp", &[]);
+                        if player_state_deserialized.current_xp == player_state_deserialized.xp_needed_for_next_level - 1 {
+                            os::client::exec("project_honkai", "increment_player_xp", &[]);
+                            os::client::exec("project_honkai", "increment_faction_level", player_state_deserialized.faction.as_bytes());
+                        }
+                        else {
+                            os::client::exec("project_honkai", "increment_player_xp", &[]);
+                        }
                     }
                     else if gamepad(0).start.just_released() {
                         local_state.egghead_state = false;
-
-                        if player_state_deserialized.current_xp == player_state_deserialized.xp_needed_for_next_level {
-                            // also increment the faction score of the player!
-                            os::client::exec("project_honkai", "increment_faction_level", player_state_deserialized.faction.as_bytes());
-                            // level up the player
-                            os::client::exec("project_honkai", "level_up_player", &[]);
-                        }
                     }
+
+                    local_state.save();
                 },
-                Err(_err) => {
-                    // at this point, there should be player data, if not we need to panic
-                    panic!("PLAYER DATA SHOULD EXIST, BUT DOESN'T?")
+                None => {
+
+                    // THIS IS THE CASE WHERE THERE IS A NONE IN THE FACTION STATES
+                    local_state.save();
+                    return;
                 }
             }
-
         },
         _ => {
-
-            panic!("SCENE OUT OF BOUNDS???");
-
+            // THIS IS WHERE IF THE SCENE IS NOT 0 OR 1, AND THE PLAYER STATE CAN'T BE DESERIALIZED 
+            local_state.save();
+            return;
         }
     }
-
-    local_state.save();
 });
+
+fn deserialize_factions() -> Option<(FactionState, FactionState, FactionState)> {
+    // get the factions, or early return None if anything here doesnt exist - thats what the ? does
+    // green
+    let green_faction_file = os::client::read_file("project_honkai", "factions/green").ok()?;
+    let green_faction_deserialized = states::FactionState::try_from_slice(&green_faction_file.contents).ok()?;
+    // orange
+    let orange_faction_file = os::client::read_file("project_honkai", "factions/orange").ok()?;
+    let orange_faction_deserialized = states::FactionState::try_from_slice(&orange_faction_file.contents).ok()?;
+    // purple
+    let purple_faction_file = os::client::read_file("project_honkai", "factions/purple").ok()?;
+    let purple_faction_deserialized = states::FactionState::try_from_slice(&purple_faction_file.contents).ok()?;
+    // return
+    Some((green_faction_deserialized, orange_faction_deserialized, purple_faction_deserialized))
+}
