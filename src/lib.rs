@@ -170,6 +170,9 @@ turbo::go! ({
             // ui
             sprite!("ui_faction_bar", x = 38, y = 21);
             sprite!("ui_xp_bar", x = 39, y = 65);
+            // light sprite moving
+            sprite!("lights_overlay", x = {98 + (tick() % 36 / 4) * 24}, y = 63);
+
 
             // draw correct UI based on player faction
             match player_state_deserialized.faction.as_str() {
