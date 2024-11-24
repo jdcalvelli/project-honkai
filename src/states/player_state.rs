@@ -8,6 +8,7 @@ pub struct PlayerState {
 	pub current_xp: u64,
 	pub xp_needed_for_prev_level: u64,
 	pub xp_needed_for_next_level: u64,
+	pub did_accept_tier: bool,
 }
 
 impl PlayerState {
@@ -21,6 +22,7 @@ impl PlayerState {
 			// this val is ultimately dependant on the equation used level to level, so be sure to change here too
 			// if equation changes
 			xp_needed_for_next_level: 6,
+			did_accept_tier: true,
 		}
 	}
 }
