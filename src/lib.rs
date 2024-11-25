@@ -33,7 +33,7 @@ turbo::init! {
 impl LocalState {
     fn new() -> Self {
         Self {
-            game_scene: enums::GameScenes::FactionSelectScene,
+            game_scene: enums::GameScenes::MainMenuScene,
             view_flip: true,
             selector_pos: 0,
             egghead_state: false
@@ -49,8 +49,9 @@ turbo::go! ({
 
     match (local_state.game_scene, deserialize_player(&user_id), deserialize_factions()) {
         (enums::GameScenes::MainMenuScene, Some(player_state_deserialized), Some(faction_states_deserialized)) => {
-            log!("MAIN MENU");
-            ()
+            main_menu_scene::update(&mut local_state, &player_state_deserialized, &faction_states_deserialized);
+            main_menu_scene::draw(&mut local_state, &player_state_deserialized, &faction_states_deserialized);
+            main_menu_scene::input(&mut local_state, &player_state_deserialized, &faction_states_deserialized);
         },
         (enums::GameScenes::FactionSelectScene, Some(player_state_deserialized), Some(faction_states_deserialized)) => {
             faction_select_scene::update(&mut local_state, &player_state_deserialized, &faction_states_deserialized);
