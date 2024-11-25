@@ -27,6 +27,8 @@ unsafe extern "C" fn on_increment_player_xp() -> usize {
 				// currently, the equation is new level + 1 to the 3th power + 5
 				current_player_deserialized.xp_needed_for_next_level = 
 					(current_player_deserialized.current_level_in_tier + 1).pow(1) + 5;
+
+				current_player_deserialized.did_accept_level_up = false;
             }
 
 			// if the players level is high enough to tier up, also tier up the player
@@ -40,7 +42,7 @@ unsafe extern "C" fn on_increment_player_xp() -> usize {
 				// assumption rn is that it will be the same xp curve regardless of tier
 				current_player_deserialized.xp_needed_for_next_level = 6;
 
-				current_player_deserialized.did_accept_tier = false;
+				current_player_deserialized.did_accept_tier_up = false;
 			}
 
 			// write the data to the file

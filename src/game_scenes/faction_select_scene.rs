@@ -1,6 +1,6 @@
 use crate::*;
 
-pub fn update(local_state: &mut LocalState, player_state_deserialized: &PlayerState, _faction_states_deserialized: &(FactionState, FactionState, FactionState)) -> () {
+pub fn update(local_state: &mut LocalState, player_state_deserialized: &states::PlayerState, _faction_states_deserialized: &(states::FactionState, states::FactionState, states::FactionState)) -> () {
 	// *** UPDATE *** //
 
     if player_state_deserialized.faction != "none" {
@@ -12,7 +12,7 @@ pub fn update(local_state: &mut LocalState, player_state_deserialized: &PlayerSt
     }
 }
 
-pub fn draw(local_state: &mut LocalState, _player_state_deserialized: &PlayerState, _faction_states_deserialized: &(FactionState, FactionState, FactionState)) -> () {
+pub fn draw(local_state: &mut LocalState, _player_state_deserialized: &states::PlayerState, _faction_states_deserialized: &(states::FactionState, states::FactionState, states::FactionState)) -> () {
     // *** DRAW *** //
 
     // background
@@ -70,7 +70,7 @@ pub fn draw(local_state: &mut LocalState, _player_state_deserialized: &PlayerSta
     }
 }
 
-pub fn input(local_state: &mut LocalState, _player_state_deserialized: &PlayerState, _faction_states_deserialized: &(FactionState, FactionState, FactionState)) -> () {
+pub fn input(local_state: &mut LocalState, _player_state_deserialized: &states::PlayerState, _faction_states_deserialized: &(states::FactionState, states::FactionState, states::FactionState)) -> () {
 	// *** INPUT *** //
 
 	if gamepad(0).left.just_pressed() {

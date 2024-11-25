@@ -1,7 +1,7 @@
 use crate::*;
 
-#[export_name = "turbo/acknowledge_tier_up"]
-unsafe extern "C" fn on_acknolwedge_tier_up() -> usize {
+#[export_name = "turbo/acknowledge_level_up"]
+unsafe extern "C" fn on_acknolwedge_level_up() -> usize {
     // get the user id
     let user_id = os::server::get_user_id();
 
@@ -15,7 +15,7 @@ unsafe extern "C" fn on_acknolwedge_tier_up() -> usize {
             let mut current_player_deserialized = states::PlayerState::try_from_slice(&data).unwrap();
 
             // acknowledge the tier up
-            current_player_deserialized.did_accept_tier_up = true;
+            current_player_deserialized.did_accept_level_up = true;
 
             // write the data to the file
             let write_result = os::server::write_file(&format!("players/{user_id}"), 

@@ -1,5 +1,3 @@
-use states::{FactionState, PlayerState};
-
 mod utils;
 mod states;
 mod enums;
@@ -50,13 +48,9 @@ turbo::go! ({
     let user_id = os::client::user_id().unwrap();
 
     match (local_state.game_scene, deserialize_player(&user_id), deserialize_factions()) {
-        (_, None, _) => {
-            os::client::exec("project_honkai", "create_player_data", "none".as_bytes());
-        },
-        (_, _, None) => {
-            os::client::exec("project_honkai", "create_faction_data", "green".as_bytes());
-            os::client::exec("project_honkai", "create_faction_data", "orange".as_bytes());
-            os::client::exec("project_honkai", "create_faction_data", "purple".as_bytes());
+        (enums::GameScenes::MainMenuScene, Some(player_state_deserialized), Some(faction_states_deserialized)) => {
+            log!("MAIN MENU");
+            ()
         },
         (enums::GameScenes::FactionSelectScene, Some(player_state_deserialized), Some(faction_states_deserialized)) => {
             faction_select_scene::update(&mut local_state, &player_state_deserialized, &faction_states_deserialized);
@@ -73,7 +67,21 @@ turbo::go! ({
             tier_up_scene::draw(&mut local_state, &player_state_deserialized, &faction_states_deserialized);
             tier_up_scene::input(&mut local_state, &player_state_deserialized, &faction_states_deserialized);
         },
-        _ => ()
+        (enums::GameScenes::LevelUpScene, Some(player_state_deserialized), Some(faction_states_deserialized)) => {
+            level_up_scene::update(&mut local_state, &player_state_deserialized, &faction_states_deserialized);
+            level_up_scene::draw(&mut local_state, &player_state_deserialized, &faction_states_deserialized);
+            level_up_scene::input(&mut local_state, &player_state_deserialized, &faction_states_deserialized);
+        },
+        (_, None, _) => {
+            log!("CREATE PLAYER");
+            os::client::exec("project_honkai", "create_player_data", "none".as_bytes());
+        },
+        (_, _, None) => {
+            log!("CREATE FACTIONS");
+            os::client::exec("project_honkai", "create_faction_data", "green".as_bytes());
+            os::client::exec("project_honkai", "create_faction_data", "orange".as_bytes());
+            os::client::exec("project_honkai", "create_faction_data", "purple".as_bytes());
+        },
     }
 
     local_state.save();
@@ -81,14 +89,14 @@ turbo::go! ({
 
 // UTILITY FUNCS
 
-fn deserialize_player(user_id: &str) -> Option<PlayerState>{
+fn deserialize_player(user_id: &str) -> Option<states::PlayerState>{
     // get the player state, or return early none if anything doesnt exist
     let player_file = os::client::read_file("project_honkai", &format!("players/{user_id}")).ok()?;
     let player_deserialized = states::PlayerState::try_from_slice(&player_file.contents).ok()?;
     Some(player_deserialized)
 }
 
-fn deserialize_factions() -> Option<(FactionState, FactionState, FactionState)> {
+fn deserialize_factions() -> Option<(states::FactionState, states::FactionState, states::FactionState)> {
     // get the factions, or early return None if anything here doesnt exist - thats what the ? does
     // green
     let green_faction_file = os::client::read_file("project_honkai", "factions/green").ok()?;

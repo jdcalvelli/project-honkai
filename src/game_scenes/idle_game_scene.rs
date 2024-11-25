@@ -1,13 +1,16 @@
 use crate::*;
 
-pub fn update(local_state: &mut LocalState, player_state_deserialized: &PlayerState, _faction_states_deserialized: &(FactionState, FactionState, FactionState)) -> () {
+pub fn update(local_state: &mut LocalState, player_state_deserialized: &states::PlayerState, _faction_states_deserialized: &(states::FactionState, states::FactionState, states::FactionState)) -> () {
     // read the player state to see if the bool is flipped basically
-    if !player_state_deserialized.did_accept_tier {
+    if !player_state_deserialized.did_accept_level_up {
+        local_state.game_scene = enums::GameScenes::LevelUpScene;
+    }
+    else if !player_state_deserialized.did_accept_tier_up {
         local_state.game_scene = enums::GameScenes::TierUpScene;
     }
 }
 
-pub fn draw(local_state: &mut LocalState, player_state_deserialized: &PlayerState, faction_states_deserialized: &(FactionState, FactionState, FactionState)) -> () {  
+pub fn draw(local_state: &mut LocalState, player_state_deserialized: &states::PlayerState, faction_states_deserialized: &(states::FactionState, states::FactionState, states::FactionState)) -> () {  
     let (green_faction_deserialized, orange_faction_deserialized, purple_faction_deserialized) = faction_states_deserialized;
     // *** DRAW *** //
 
@@ -257,7 +260,7 @@ pub fn draw(local_state: &mut LocalState, player_state_deserialized: &PlayerStat
     }
 }
 
-pub fn input(local_state: &mut LocalState, player_state_deserialized: &PlayerState, _faction_states_deserialized: &(FactionState, FactionState, FactionState)) -> () {
+pub fn input(local_state: &mut LocalState, player_state_deserialized: &states::PlayerState, _faction_states_deserialized: &(states::FactionState, states::FactionState, states::FactionState)) -> () {
     // *** INPUT *** //
 
     if gamepad(0).start.just_pressed() {
