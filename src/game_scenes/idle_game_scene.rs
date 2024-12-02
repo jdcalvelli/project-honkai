@@ -5,9 +5,6 @@ pub fn update(local_state: &mut LocalState, player_state_deserialized: &states::
     if !player_state_deserialized.did_accept_level_up {
         local_state.game_scene = enums::GameScenes::LevelUpScene;
     }
-    else if !player_state_deserialized.did_accept_tier_up {
-        local_state.game_scene = enums::GameScenes::TierUpScene;
-    }
 }
 
 pub fn draw(local_state: &mut LocalState, player_state_deserialized: &states::PlayerState, faction_states_deserialized: &(states::FactionState, states::FactionState, states::FactionState)) -> () {  

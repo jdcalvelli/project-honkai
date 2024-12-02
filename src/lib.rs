@@ -47,7 +47,7 @@ turbo::go! ({
     // get user id, for use across scenes
     let user_id = os::client::user_id().unwrap();
 
-    match (local_state.game_scene, deserialize_player(&user_id), deserialize_factions()) {
+    match (local_state.game_scene, utils::deserialize_player(&user_id), utils::deserialize_factions()) {
         (enums::GameScenes::MainMenuScene, Some(player_state_deserialized), Some(faction_states_deserialized)) => {
             main_menu_scene::update(&mut local_state, &player_state_deserialized, &faction_states_deserialized);
             main_menu_scene::draw(&mut local_state, &player_state_deserialized, &faction_states_deserialized);
@@ -87,27 +87,3 @@ turbo::go! ({
 
     local_state.save();
 });
-
-// UTILITY FUNCS
-
-fn deserialize_player(user_id: &str) -> Option<states::PlayerState>{
-    // get the player state, or return early none if anything doesnt exist
-    let player_file = os::client::read_file("project_honkai", &format!("players/{user_id}")).ok()?;
-    let player_deserialized = states::PlayerState::try_from_slice(&player_file.contents).ok()?;
-    Some(player_deserialized)
-}
-
-fn deserialize_factions() -> Option<(states::FactionState, states::FactionState, states::FactionState)> {
-    // get the factions, or early return None if anything here doesnt exist - thats what the ? does
-    // green
-    let green_faction_file = os::client::read_file("project_honkai", "factions/green").ok()?;
-    let green_faction_deserialized = states::FactionState::try_from_slice(&green_faction_file.contents).ok()?;
-    // orange
-    let orange_faction_file = os::client::read_file("project_honkai", "factions/orange").ok()?;
-    let orange_faction_deserialized = states::FactionState::try_from_slice(&orange_faction_file.contents).ok()?;
-    // purple
-    let purple_faction_file = os::client::read_file("project_honkai", "factions/purple").ok()?;
-    let purple_faction_deserialized = states::FactionState::try_from_slice(&purple_faction_file.contents).ok()?;
-    // return
-    Some((green_faction_deserialized, orange_faction_deserialized, purple_faction_deserialized))
-}

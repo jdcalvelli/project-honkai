@@ -4,7 +4,12 @@ pub fn update(local_state: &mut LocalState, player_state_deserialized: &states::
     // *** UPDATE *** //  
 
     if player_state_deserialized.did_accept_level_up {
-        local_state.game_scene = enums::GameScenes::IdleGameScene;
+        if !player_state_deserialized.did_accept_tier_up {
+            local_state.game_scene = enums::GameScenes::TierUpScene;
+        }
+        else {
+            local_state.game_scene = enums::GameScenes::IdleGameScene;   
+        }
     }
 
     if tick() % 16 == 0 {
