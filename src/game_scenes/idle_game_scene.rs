@@ -23,8 +23,8 @@ pub fn draw(local_state: &mut LocalState, player_state_deserialized: &states::Pl
 
 
     // draw correct UI based on player faction
-    match player_state_deserialized.faction.as_str() {
-        "green" => {
+    match player_state_deserialized.faction {
+        enums::Factions::Green => {
             // draw the green bar at top
             sprite!("ui_faction_bars_green", x = 43, y = 26);
             rect!(
@@ -72,7 +72,7 @@ pub fn draw(local_state: &mut LocalState, player_state_deserialized: &states::Pl
             // green faction card
             sprite!("ui_faction_profile_green", x = 272, y = 121);
         },
-        "orange" => {
+        enums::Factions::Orange => {
             // draw the orange bar at top
             sprite!("ui_faction_bars_orange", x = 43, y = 26);
             rect!(
@@ -120,7 +120,7 @@ pub fn draw(local_state: &mut LocalState, player_state_deserialized: &states::Pl
             // orange faction card
             sprite!("ui_faction_profile_orange", x = 272, y = 121);
         },
-        "purple" => {
+        enums::Factions::Purple => {
             // draw the purple bar at top
             sprite!("ui_faction_bars_purple", x = 43, y = 26);
             rect!(
@@ -168,7 +168,7 @@ pub fn draw(local_state: &mut LocalState, player_state_deserialized: &states::Pl
             // purple faction card
             sprite!("ui_faction_profile_purple", x = 272, y = 121);
         },
-        _ => (),
+        enums::Factions::NoFaction => (),
     }
 
     // non faction specific draws
@@ -219,39 +219,40 @@ pub fn draw(local_state: &mut LocalState, player_state_deserialized: &states::Pl
     // foreground
     sprite!("seat", x = 174, y = 163);
 
+    // i could squash this match
     match local_state.egghead_state {
         true => {
             // draw button pressed
             sprite!("button_press", x = 209, y = 152);
             // match the egghead based on player faction
-            match player_state_deserialized.faction.as_str() {
-                "green" => {
+            match player_state_deserialized.faction {
+                enums::Factions::Green => {
                     sprite!("egghead_green_press", x = 168, y = 121);
                 },
-                "orange" => {
+                enums::Factions::Orange => {
                     sprite!("egghead_orange_press", x = 168, y = 121);
                 },
-                "purple" => {
+                enums::Factions::Purple => {
                     sprite!("egghead_purple_press", x = 168, y = 121);
                 },
-                _ => ()
+                enums::Factions::NoFaction => ()
             }
         },
         false => {
             // draw button released
             sprite!("button_release", x = 209, y = 152);
             // draw right egg
-            match player_state_deserialized.faction.as_str() {
-                "green" => {
+            match player_state_deserialized.faction {
+                enums::Factions::Green => {
                     sprite!("egghead_green_release", x = 168, y = 121);
                 },
-                "orange" => {
+                enums::Factions::Orange => {
                     sprite!("egghead_orange_release", x = 168, y = 121);
                 },
-                "purple" => {
+                enums::Factions::Purple => {
                     sprite!("egghead_purple_release", x = 168, y = 121);
                 },
-                _ => ()
+                enums::Factions::NoFaction => ()
             }
         },
     }
@@ -264,7 +265,7 @@ pub fn input(local_state: &mut LocalState, player_state_deserialized: &states::P
         local_state.egghead_state = true;
         if player_state_deserialized.current_xp == player_state_deserialized.xp_needed_for_next_level - 1 {
             os::client::exec("project_honkai", "increment_player_xp", &[]);
-            os::client::exec("project_honkai", "increment_faction_level", player_state_deserialized.faction.as_bytes());
+            os::client::exec("project_honkai", "increment_faction_level", &borsh::to_vec(&player_state_deserialized.faction).unwrap());
         }
         else {
             os::client::exec("project_honkai", "increment_player_xp", &[]);

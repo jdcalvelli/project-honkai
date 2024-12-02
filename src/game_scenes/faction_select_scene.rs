@@ -3,7 +3,7 @@ use crate::*;
 pub fn update(local_state: &mut LocalState, player_state_deserialized: &states::PlayerState, _faction_states_deserialized: &(states::FactionState, states::FactionState, states::FactionState)) -> () {
 	// *** UPDATE *** //
 
-    if player_state_deserialized.faction != "none" {
+    if player_state_deserialized.faction != enums::Factions::NoFaction {
         local_state.game_scene = enums::GameScenes::IdleGameScene;
     }
 
@@ -90,13 +90,13 @@ pub fn input(local_state: &mut LocalState, _player_state_deserialized: &states::
 	else if gamepad(0).start.just_pressed() {
 	    match local_state.selector_pos {
 	        0 => {
-	            os::client::exec("project_honkai", "update_player_faction", "orange".as_bytes());
+	            os::client::exec("project_honkai", "update_player_faction", &borsh::to_vec(&enums::Factions::Orange).unwrap());
 	        },
 	        1 => {
-	            os::client::exec("project_honkai", "update_player_faction", "green".as_bytes());
+	            os::client::exec("project_honkai", "update_player_faction", &borsh::to_vec(&enums::Factions::Green).unwrap());
 	        },
 	        2 => {
-	            os::client::exec("project_honkai", "update_player_faction", "purple".as_bytes());
+	            os::client::exec("project_honkai", "update_player_faction", &borsh::to_vec(&enums::Factions::Purple).unwrap());
 	        },
 	        _ => ()
 	    }

@@ -75,13 +75,13 @@ turbo::go! ({
         },
         (_, None, _) => {
             log!("CREATE PLAYER");
-            os::client::exec("project_honkai", "create_player_data", "none".as_bytes());
+            os::client::exec("project_honkai", "create_player_data", &borsh::to_vec(&enums::Factions::NoFaction).unwrap());
         },
         (_, _, None) => {
             log!("CREATE FACTIONS");
-            os::client::exec("project_honkai", "create_faction_data", "green".as_bytes());
-            os::client::exec("project_honkai", "create_faction_data", "orange".as_bytes());
-            os::client::exec("project_honkai", "create_faction_data", "purple".as_bytes());
+            os::client::exec("project_honkai", "create_faction_data", &borsh::to_vec(&enums::Factions::Green).unwrap());
+            os::client::exec("project_honkai", "create_faction_data", &borsh::to_vec(&enums::Factions::Orange).unwrap());
+            os::client::exec("project_honkai", "create_faction_data", &borsh::to_vec(&enums::Factions::Purple).unwrap());
         },
     }
 

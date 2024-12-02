@@ -7,36 +7,21 @@ unsafe extern "C" fn on_acknolwedge_tier_up() -> usize {
 
     // try to read player state data from file, which returns Result
     let read_result = os::server::read_file(&format!("players/{user_id}"));
-
-    // check based on result what we should do next
-    match read_result {
-        Ok(data) => {
-            // if data exists, deserialize the struct and set holder to it
-            let mut current_player_deserialized = states::PlayerState::try_from_slice(&data).unwrap();
-
-            // acknowledge the tier up
-            current_player_deserialized.did_accept_tier_up = true;
-
-            // write the data to the file
-            let write_result = os::server::write_file(&format!("players/{user_id}"), 
-                &current_player_deserialized.try_to_vec().unwrap());
-
-            match write_result {
-                Ok(_) => {
-                    // commit the change if theres no issue writing data
-                    os::server::COMMIT
-                }
-                Err(err) => {
-                    // cancel the change if there is an error in writing for some reason
-                    os::server::log(&err.to_string());
-                    os::server::CANCEL
-                }
-            }
-        },
-        Err(_err) => {
-            // if there is no read data, cancel the execution
-            os::server::CANCEL
-
-        },
+    if read_result.is_err() {
+        // no read data?
+        return os::server::CANCEL
     }
+
+    let mut current_player_deserialized = states::PlayerState::try_from_slice(&read_result.unwrap()).unwrap();
+    current_player_deserialized.did_accept_tier_up = true;
+
+    // try write
+    let write_result = os::server::write_file(&format!("players/{user_id}"), 
+        &current_player_deserialized.try_to_vec().unwrap());
+    if write_result.is_err() {
+        // write error
+        return os::server::CANCEL
+    }
+
+    os::server::COMMIT
 }

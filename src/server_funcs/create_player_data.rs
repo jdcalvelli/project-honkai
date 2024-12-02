@@ -5,50 +5,31 @@ unsafe extern "C" fn on_create_player_data() -> usize {
 	// get the user id
 	let user_id = os::server::get_user_id();
 
-	// get the function data, which in this case is which faction the player chose to join
-	let function_input = os::server::get_command_data();
-
-	let function_input_as_string = String::from_utf8(function_input);
+	// get the function data deserialized
+	let function_input_deserialized = os::server::command!(enums::Factions);
+	if function_input_deserialized != enums::Factions::NoFaction {
+		// if the wrong input came in, cancel
+		return os::server::CANCEL
+	}
 
 	// try to read player state data from file, which returns Result
 	let read_result = os::server::read_file(&format!("players/{user_id}"));
-
-	match read_result {
-		Ok(_data) => {
-			// if there is data there already, then cancel the creation of the info
-			os::server::CANCEL
-		},
-		Err(_err) => {
-			// if there is NOT a file there already, then create a file
-			let mut current_player_deserialized: states::PlayerState = states::PlayerState::new();
-
-			// change the faction value based on function input
-			match function_input_as_string{
-				Ok(faction_string) => {
-					// i might want to put another match statement in here to make sure the right string came through
-					current_player_deserialized.faction = faction_string;
-					// write the new data to the file
-					let write_result = os::server::write_file(&format!("players/{user_id}"), 
-						&current_player_deserialized.try_to_vec().unwrap());
-
-					match write_result {
-						Ok(_) => {
-							// commit the change if theres no issue in the write
-							os::server::COMMIT
-						}
-						Err(err) => {
-							// cancel the change if there is an error in the write
-							os::server::log(&err.to_string());
-							os::server::CANCEL
-						}
-					}
-				},
-				Err(_) => {
-					// what came through was not valid utf8, so cancel
-					os::server::CANCEL
-				},
-
-			}
-		}
+	if read_result.is_ok() {
+		// if there is data there already, then cancel info creation
+		return os::server::CANCEL
 	}
+	
+	// there is not currently a player file, lets create one
+	let mut current_player_deserialized: states::PlayerState = states::PlayerState::new();
+	// set the faction to be what i want, which is no faction at this point
+	current_player_deserialized.faction = function_input_deserialized;
+	// write the file
+	let write_result = os::server::write_file(&format!("players/{user_id}"),
+		&current_player_deserialized.try_to_vec().unwrap());
+	if write_result.is_err() {
+		// write error
+		return os::server::CANCEL
+	}
+	
+	os::server::COMMIT
 }

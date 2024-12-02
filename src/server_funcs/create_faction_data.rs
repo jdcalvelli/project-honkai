@@ -4,47 +4,41 @@ use crate::*;
 
 #[export_name = "turbo/create_faction_data"]
 unsafe extern "C" fn on_create_faction_data() -> usize {
-	// first get the function data which will be the faction name
-	let function_data = os::server::get_command_data();
 
-	// translate function data to string
-	let function_data_as_string = String::from_utf8(function_data);
-
-	// first make sure the function data was acceptable utf8
-	match function_data_as_string {
-		Ok(faction_string) => {
-			// try to read the remote data for associated faction
-			// should prob have a check of whether the string is acceptable lol
-			let read_result = os::server::read_file(&format!("factions/{faction_string}"));
-
-			// check for presense of that data
-			match read_result {
-				Ok(_data) => {
-					// if the data already exists, just cancel the transaction
-					os::server::CANCEL
-				},
-				Err(_err) => {
-					// if the data doesn't already exist, then create the data based on faction string
-					let write_result = os::server::write_file(&format!("factions/{faction_string}"), 
-						&states::FactionState::new().try_to_vec().unwrap());
-
-					match write_result {
-						Ok(_) => {
-							os::server::COMMIT
-						},
-						Err(err) => {
-							// write error
-							os::server::log(&err.to_string());
-							os::server::CANCEL
-						},
-					}
-				},
-			}
-
-		},
-		Err(_) => {
-			// utf8 passed through was not acceptable
+	// get the function data deserialized
+	let function_data_deserialized = os::server::command!(enums::Factions);
+	
+	match function_data_deserialized {
+		enums::Factions::NoFaction => {
+			// error, we dont want to write a file for no faction
 			os::server::CANCEL
 		}
+		enums::Factions::Green => {
+			write_faction_file_if_not_there("green")
+		},
+		enums::Factions::Purple => {
+			write_faction_file_if_not_there("orange")
+		},
+		enums::Factions::Orange => {
+			write_faction_file_if_not_there("purple")
+		}
 	}
+}
+
+fn write_faction_file_if_not_there(faction_name: &str) -> usize {
+	// check if the data exists
+	let read_result = os::server::read_file(&format!("factions/{faction_name}"));
+	if read_result.is_ok() {
+		// data already exists so cancel
+		return os::server::CANCEL
+	}
+	// data doesnt exist so write it
+	let write_result = os::server::write_file(&format!("factions/{faction_name}"), 
+		&states::FactionState::new().try_to_vec().unwrap());
+	if write_result.is_err() {
+		// write error
+		return os::server::CANCEL
+	}
+	
+	os::server::COMMIT
 }

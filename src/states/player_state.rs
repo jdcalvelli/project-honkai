@@ -2,7 +2,7 @@ use crate::*;
 
 #[derive(Debug, Clone, PartialEq, BorshDeserialize, BorshSerialize)]
 pub struct PlayerState {
-	pub faction: String,
+	pub faction: enums::Factions,
 	pub current_tier: u64,
 	pub current_level_in_tier: u64,
 	pub current_xp: u64,
@@ -15,7 +15,7 @@ pub struct PlayerState {
 impl PlayerState {
 	pub fn new() -> Self {
 		Self {
-			faction: "none".to_string(),
+			faction: enums::Factions::NoFaction,
 			current_tier: 0,
 			current_level_in_tier: 0,
 			current_xp: 0,

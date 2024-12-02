@@ -4,52 +4,35 @@ use crate::*;
 
 #[export_name = "turbo/increment_faction_level"]
 unsafe extern "C" fn on_increment_faction_level() -> usize {
-	// get the player's faction from the function data
-	let function_input = os::server::get_command_data();
-
-	// translate function data to string
-	let function_input_as_string = String::from_utf8(function_input);
-
-	match function_input_as_string {
-		Ok(faction_string) => {
-			// should prob have some sort of check that the string is sanitized
-
-			// read the state of the current faction file
-			let read_data = os::server::read_file(&format!("factions/{faction_string}"));
-
-			match read_data {
-				Ok(data) => {
-					// if the remote data exists, deserialize
-					let mut current_faction_deserialized = states::FactionState::try_from_slice(&data).unwrap();
-					current_faction_deserialized.current_level += 1;
-
-					// write the update to file
-					let write_result = os::server::write_file(&format!("factions/{faction_string}"), 
-						&current_faction_deserialized.try_to_vec().unwrap());
-
-					match write_result {
-						Ok(_) => {
-							// no write error, so commit
-							os::server::COMMIT
-						},
-						Err(err) => {
-							// write error, log and cancel
-							os::server::log(&err.to_string());
-							os::server::CANCEL
-						}
-					}
-
-				},
-				Err(err) => {
-					// if there is no read data for some reason, cancel
-					os::server::log(&err.to_string());
-					os::server::CANCEL
-				}
-			}
-		},
-		Err(_) => {
-			// the data passed through was not valid utf8
-			os::server::CANCEL
-		}
+	// get function input deserialized
+	let function_input_deserialized = os::server::command!(enums::Factions);
+	
+	// create var for which faction we're talking about
+	// in the event that the faction that came through is nofaction cancel
+	let faction_in_question_as_str: &str;
+	match function_input_deserialized {
+		enums::Factions::Green => faction_in_question_as_str = "green",
+		enums::Factions::Orange => faction_in_question_as_str = "orange",
+		enums::Factions::Purple => faction_in_question_as_str = "purple",
+		enums::Factions::NoFaction => return os::server::CANCEL
 	}
+	
+	// read based on what we got
+	let read_result = os::server::read_file(&format!("factions/{faction_in_question_as_str}"));
+	if read_result.is_err() {
+		// no data, error
+		return os::server::CANCEL
+	}
+	
+	let mut current_faction_deserialized = states::FactionState::try_from_slice(&read_result.unwrap()).unwrap();
+	current_faction_deserialized.current_level += 1;
+	
+	// write change
+	let write_result = os::server::write_file(&format!("factions/{faction_in_question_as_str}"), 
+		&current_faction_deserialized.try_to_vec().unwrap());
+	if write_result.is_err() {
+		return os::server::CANCEL
+	}
+	
+	os::server::COMMIT
 }
