@@ -12,7 +12,7 @@ turbo::cfg! {r#"
     author = "jd calvelli and devinne moses"
     description = "a game about modern games"
     [settings]
-    resolution = [384, 216]
+    resolution = [384, 326]
     [turbo-os]
     api-url = "https://os.turbo.computer"
 "#}

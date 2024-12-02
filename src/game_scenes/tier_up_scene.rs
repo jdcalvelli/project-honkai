@@ -30,11 +30,26 @@ pub fn draw(local_state: &mut LocalState, player_state_deserialized: &states::Pl
     else {
         sprite!("red_gogo_02", x = 149, y = 144);
     }
+    
+    // not on the computer screen
+    sprite!("bg_keyboard", x = 0, y = 210);
+    if local_state.egghead_state {
+        sprite!("spacebar_02", x = 126, y = 269);
+        sprite!("hand_02", x = 48, y = 266);
+    }
+    else {
+        sprite!("spacebar_01", x = 126, y = 268);
+        sprite!("hand_01", x = 47, y = 263);
+    }
 }
 
-pub fn input(_local_state: &mut LocalState, _player_state_deserialized: &states::PlayerState, _faction_states_deserialized: &(states::FactionState, states::FactionState, states::FactionState)) -> () {
+pub fn input(local_state: &mut LocalState, _player_state_deserialized: &states::PlayerState, _faction_states_deserialized: &(states::FactionState, states::FactionState, states::FactionState)) -> () {
 	if gamepad(0).start.just_pressed() {
+        local_state.egghead_state = true;
         // now i need a transaction to set flag back
         os::client::exec("project_honkai", "acknowledge_tier_up", &[]);
 	}
+    else if gamepad(0).start.just_released() {
+        local_state.egghead_state = false;
+    }
 }
