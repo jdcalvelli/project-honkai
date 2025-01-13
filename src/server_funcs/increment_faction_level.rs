@@ -26,13 +26,40 @@ unsafe extern "C" fn on_increment_faction_level() -> usize {
 	
 	let mut current_faction_deserialized = states::FactionState::try_from_slice(&read_result.unwrap()).unwrap();
 	current_faction_deserialized.current_level += 1;
-	
-	// write change
-	let write_result = os::server::write_file(&format!("factions/{faction_in_question_as_str}"), 
-		&current_faction_deserialized.try_to_vec().unwrap());
-	if write_result.is_err() {
-		return os::server::CANCEL
+
+	if current_faction_deserialized.current_level == current_faction_deserialized.max_level {
+		// faction win, cause reset
+		// just write empty vec to all the factions
+		// this resets factions, but not players
+		// need some way to reset players as a result of this
+		let write_result = os::server::write_file("factions/green", &[]);
+
+		if write_result.is_err() {
+			return os::server::CANCEL
+		}
+
+		let write_result = os::server::write_file("factions/orange", &[]);
+		if write_result.is_err() {
+			return os::server::CANCEL
+		}
+
+		let write_result = os::server::write_file("factions/purple", &[]);
+		if write_result.is_err() {
+			return os::server::CANCEL
+		}
+
+		os::server::alert!("RESET");
+
+		os::server::COMMIT
 	}
+	else {
+		// write change
+		let write_result = os::server::write_file(&format!("factions/{faction_in_question_as_str}"), 
+		&current_faction_deserialized.try_to_vec().unwrap());
+		if write_result.is_err() {
+			return os::server::CANCEL
+		}
 	
-	os::server::COMMIT
+		os::server::COMMIT
+	}
 }

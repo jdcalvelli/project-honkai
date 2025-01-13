@@ -6,6 +6,8 @@ mod server_funcs;
 
 use game_scenes::*;
 
+static PROGRAM_ID: &str = "a";
+
 turbo::cfg! {r#"
     name = "project-honkai"
     version = "0.1.0"
@@ -25,6 +27,7 @@ turbo::init! {
         view_flip: bool,
         selector_pos: u16,
         egghead_state: bool,
+        last_event_time: u32,
     } = {
         Self::new()
     }
@@ -36,7 +39,8 @@ impl LocalState {
             game_scene: enums::GameScenes::MainMenuScene,
             view_flip: true,
             selector_pos: 0,
-            egghead_state: false
+            egghead_state: false,
+            last_event_time: 0
         }
     }
 }
@@ -46,6 +50,20 @@ turbo::go! ({
 
     // get user id, for use across scenes
     let user_id = os::client::user_id().unwrap();
+
+    if let Some(event) = os::client::watch_events(PROGRAM_ID, Some("alert")).data {
+        // if the time of the current event is not the same as the last one saved
+        if event.created_at != local_state.last_event_time {
+            // save the event as the last event
+            local_state.last_event_time = event.created_at;
+            // then do whatever i want when the event happens, which in this case is reset the player
+            // doesn't maintain old faction for now
+            os::client::exec(PROGRAM_ID, "create_player_data", &borsh::to_vec(&enums::Factions::NoFaction).unwrap());
+            // set game scene back to starting scene
+            local_state.game_scene = enums::GameScenes::MainMenuScene;
+        }
+    }
+
 
     match (local_state.game_scene, utils::deserialize_player(&user_id), utils::deserialize_factions()) {
         (enums::GameScenes::MainMenuScene, Some(player_state_deserialized), Some(faction_states_deserialized)) => {
@@ -73,16 +91,21 @@ turbo::go! ({
             level_up_scene::draw(&mut local_state, &player_state_deserialized, &faction_states_deserialized);
             level_up_scene::input(&mut local_state, &player_state_deserialized, &faction_states_deserialized);
         },
-        (_, None, _) => {
-            log!("CREATE PLAYER");
-            os::client::exec("project_honkai", "create_player_data", &borsh::to_vec(&enums::Factions::NoFaction).unwrap());
-        },
         (_, _, None) => {
-            log!("CREATE FACTIONS");
-            os::client::exec("project_honkai", "create_faction_data", &borsh::to_vec(&enums::Factions::Green).unwrap());
-            os::client::exec("project_honkai", "create_faction_data", &borsh::to_vec(&enums::Factions::Orange).unwrap());
-            os::client::exec("project_honkai", "create_faction_data", &borsh::to_vec(&enums::Factions::Purple).unwrap());
+            // log!("CREATE FACTIONS");
+            os::client::exec(PROGRAM_ID, "create_faction_data", &borsh::to_vec(&enums::Factions::Green).unwrap());
+            os::client::exec(PROGRAM_ID, "create_faction_data", &borsh::to_vec(&enums::Factions::Orange).unwrap());
+            os::client::exec(PROGRAM_ID, "create_faction_data", &borsh::to_vec(&enums::Factions::Purple).unwrap());
         },
+        (_, None, _) => {
+            // log!("CREATE PLAYER");
+            os::client::exec(PROGRAM_ID, "create_player_data", &borsh::to_vec(&enums::Factions::NoFaction).unwrap());
+        },
+    }
+
+    // temp reset
+    if gamepad(0).up.just_pressed() {
+        os::client::exec(PROGRAM_ID, "temp_reset_game", &[]);
     }
 
     local_state.save();

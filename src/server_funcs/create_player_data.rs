@@ -12,12 +12,15 @@ unsafe extern "C" fn on_create_player_data() -> usize {
 		return os::server::CANCEL
 	}
 
+	// i don't care if the player data is there already, we're overwriting if this function
+	// is getting called
+	// below is what i had when i cared if data was already there lol
 	// try to read player state data from file, which returns Result
-	let read_result = os::server::read_file(&format!("players/{user_id}"));
-	if read_result.is_ok() {
-		// if there is data there already, then cancel info creation
-		return os::server::CANCEL
-	}
+	// let read_result = os::server::read_file(&format!("players/{user_id}"));
+	// if read_result.is_ok() {
+	// 	// if there is data there already, then cancel info creation
+	// 	return os::server::CANCEL
+	// }
 	
 	// there is not currently a player file, lets create one
 	let mut current_player_deserialized: states::PlayerState = states::PlayerState::new();

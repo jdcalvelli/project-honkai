@@ -103,13 +103,13 @@ pub fn input(local_state: &mut LocalState, _player_state_deserialized: &states::
         
 	    match local_state.selector_pos {
 	        0 => {
-	            os::client::exec("project_honkai", "update_player_faction", &borsh::to_vec(&enums::Factions::Orange).unwrap());
+	            os::client::exec(PROGRAM_ID, "update_player_faction", &borsh::to_vec(&enums::Factions::Orange).unwrap());
 	        },
 	        1 => {
-	            os::client::exec("project_honkai", "update_player_faction", &borsh::to_vec(&enums::Factions::Green).unwrap());
+	            os::client::exec(PROGRAM_ID, "update_player_faction", &borsh::to_vec(&enums::Factions::Green).unwrap());
 	        },
 	        2 => {
-	            os::client::exec("project_honkai", "update_player_faction", &borsh::to_vec(&enums::Factions::Purple).unwrap());
+	            os::client::exec(PROGRAM_ID, "update_player_faction", &borsh::to_vec(&enums::Factions::Purple).unwrap());
 	        },
 	        _ => ()
 	    }

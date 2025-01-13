@@ -29,8 +29,12 @@ fn write_faction_file_if_not_there(faction_name: &str) -> usize {
 	// check if the data exists
 	let read_result = os::server::read_file(&format!("factions/{faction_name}"));
 	if read_result.is_ok() {
-		// data already exists so cancel
-		return os::server::CANCEL
+		// data already exists
+		if !read_result.unwrap().is_empty() {
+			// if not empty, then cancel
+			return os::server::CANCEL
+		}
+		// if it is empty we need to keep going
 	}
 	// data doesnt exist so write it
 	let write_result = os::server::write_file(&format!("factions/{faction_name}"), 

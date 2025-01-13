@@ -275,11 +275,11 @@ pub fn input(local_state: &mut LocalState, player_state_deserialized: &states::P
     if gamepad(0).start.just_pressed() {
         local_state.egghead_state = true;
         if player_state_deserialized.current_xp == player_state_deserialized.xp_needed_for_next_level - 1 {
-            os::client::exec("project_honkai", "increment_player_xp", &[]);
-            os::client::exec("project_honkai", "increment_faction_level", &borsh::to_vec(&player_state_deserialized.faction).unwrap());
+            os::client::exec(PROGRAM_ID, "increment_player_xp", &[]);
+            os::client::exec(PROGRAM_ID, "increment_faction_level", &borsh::to_vec(&player_state_deserialized.faction).unwrap());
         }
         else {
-            os::client::exec("project_honkai", "increment_player_xp", &[]);
+            os::client::exec(PROGRAM_ID, "increment_player_xp", &[]);
         }
     }
     else if gamepad(0).start.just_released() {

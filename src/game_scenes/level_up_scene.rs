@@ -49,7 +49,7 @@ pub fn input(local_state: &mut LocalState, _player_state_deserialized: &states::
 	if gamepad(0).start.just_pressed() {
         local_state.egghead_state = true;
         // now i need a transaction to set flag back
-        os::client::exec("project_honkai", "acknowledge_level_up", &[]);
+        os::client::exec(PROGRAM_ID, "acknowledge_level_up", &[]);
 	}
     else if gamepad(0).start.just_released() {
         local_state.egghead_state = false;
