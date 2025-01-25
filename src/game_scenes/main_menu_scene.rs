@@ -1,6 +1,8 @@
 use crate::*;
 
-pub fn update(local_state: &mut LocalState, _player_state_deserialized: &states::PlayerState, _faction_states_deserialized: &(states::FactionState, states::FactionState, states::FactionState)) -> () {
+// ADD A CHECK FOR PLAYER ACKNOWLEDGE LAST WINNER
+
+pub fn update(local_state: &mut LocalState, _player_state_deserialized: &states::PlayerState, _faction_states_deserialized: &(states::FactionState, states::FactionState, states::FactionState), _metastate_deserialized: &states::MetaState) -> () {
     // *** UPDATE *** //  
 
     if tick() % 16 == 0 {
@@ -8,7 +10,7 @@ pub fn update(local_state: &mut LocalState, _player_state_deserialized: &states:
     }
 }
 
-pub fn draw(local_state: &mut LocalState, _player_state_deserialized: &states::PlayerState, _faction_states_deserialized: &(states::FactionState, states::FactionState, states::FactionState)) -> () {
+pub fn draw(local_state: &mut LocalState, _player_state_deserialized: &states::PlayerState, _faction_states_deserialized: &(states::FactionState, states::FactionState, states::FactionState), _metastate_deserialized: &states::MetaState) -> () {
     // *** DRAW *** //
 
     // background
@@ -42,7 +44,7 @@ pub fn draw(local_state: &mut LocalState, _player_state_deserialized: &states::P
     }
 }
 
-pub fn input(local_state: &mut LocalState, _player_state_deserialized: &states::PlayerState, _faction_states_deserialized: &(states::FactionState, states::FactionState, states::FactionState)) -> () {
+pub fn input(local_state: &mut LocalState, _player_state_deserialized: &states::PlayerState, _faction_states_deserialized: &(states::FactionState, states::FactionState, states::FactionState), _metastate_deserialized: &states::MetaState) -> () {
 	if gamepad(0).start.just_pressed() {
         local_state.egghead_state = true;
         // just go to the next scene

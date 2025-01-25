@@ -6,5 +6,6 @@ pub enum GameScenes {
 	FactionSelectScene,
 	IdleGameScene,
 	LevelUpScene,
-	TierUpScene
+	TierUpScene,
+	LastFactionWinScene
 }

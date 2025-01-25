@@ -10,6 +10,7 @@ pub struct PlayerState {
 	pub xp_needed_for_next_level: u64,
 	pub did_accept_level_up: bool,
 	pub did_accept_tier_up: bool,
+	pub did_accept_last_faction_winner: bool,
 }
 
 impl PlayerState {
@@ -25,6 +26,7 @@ impl PlayerState {
 			xp_needed_for_next_level: 6,
 			did_accept_level_up: true,
 			did_accept_tier_up: true,
+			did_accept_last_faction_winner: true,
 		}
 	}
 }

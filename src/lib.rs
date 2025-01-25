@@ -6,7 +6,7 @@ mod server_funcs;
 
 use game_scenes::*;
 
-static PROGRAM_ID: &str = "a";
+static PROGRAM_ID: &str = "asdfghjkl";
 
 turbo::cfg! {r#"
     name = "project-honkai"
@@ -48,8 +48,17 @@ impl LocalState {
 turbo::go! ({
     let mut local_state = LocalState::load();
 
-    // get user id, for use across scenes
-    let user_id = os::client::user_id().unwrap();
+    sprite!("background_layer", x = 0, y = 0);
+    sprite!("outerframe_layer", x = 0, y = 0);
+    sprite!("bg_keyboard", x = 0, y = 210);
+    if local_state.egghead_state {
+        sprite!("spacebar_02", x = 126, y = 269);
+        sprite!("hand_02", x = 48, y = 266);
+    }
+    else {
+        sprite!("spacebar_01", x = 126, y = 268);
+        sprite!("hand_01", x = 47, y = 263);
+    }
 
     if let Some(event) = os::client::watch_events(PROGRAM_ID, Some("alert")).data {
         // if the time of the current event is not the same as the last one saved
@@ -57,55 +66,68 @@ turbo::go! ({
             // save the event as the last event
             local_state.last_event_time = event.created_at;
             // then do whatever i want when the event happens, which in this case is reset the player
-            // doesn't maintain old faction for now
-            os::client::exec(PROGRAM_ID, "create_player_data", &borsh::to_vec(&enums::Factions::NoFaction).unwrap());
             // set game scene back to starting scene
-            local_state.game_scene = enums::GameScenes::MainMenuScene;
+            local_state.game_scene = enums::GameScenes::LastFactionWinScene;
         }
     }
 
+    // get user id, for use across scenes
+    let user_id = os::client::user_id().unwrap();
 
-    match (local_state.game_scene, utils::deserialize_player(&user_id), utils::deserialize_factions()) {
-        (enums::GameScenes::MainMenuScene, Some(player_state_deserialized), Some(faction_states_deserialized)) => {
-            main_menu_scene::update(&mut local_state, &player_state_deserialized, &faction_states_deserialized);
-            main_menu_scene::draw(&mut local_state, &player_state_deserialized, &faction_states_deserialized);
-            main_menu_scene::input(&mut local_state, &player_state_deserialized, &faction_states_deserialized);
+    match (local_state.game_scene, utils::deserialize_player(&user_id), utils::deserialize_factions(), utils::deserialize_metastate()) {
+        (enums::GameScenes::MainMenuScene, Some(player_state_deserialized), Some(faction_states_deserialized), Some(metastate_deserialized)) => {
+            main_menu_scene::update(&mut local_state, &player_state_deserialized, &faction_states_deserialized, &metastate_deserialized);
+            main_menu_scene::draw(&mut local_state, &player_state_deserialized, &faction_states_deserialized, &metastate_deserialized);
+            main_menu_scene::input(&mut local_state, &player_state_deserialized, &faction_states_deserialized, &metastate_deserialized);
         },
-        (enums::GameScenes::FactionSelectScene, Some(player_state_deserialized), Some(faction_states_deserialized)) => {
-            faction_select_scene::update(&mut local_state, &player_state_deserialized, &faction_states_deserialized);
-            faction_select_scene::draw(&mut local_state, &player_state_deserialized, &faction_states_deserialized);
-            faction_select_scene::input(&mut local_state, &player_state_deserialized, &faction_states_deserialized);
+        (enums::GameScenes::FactionSelectScene, Some(player_state_deserialized), Some(faction_states_deserialized), Some(metastate_deserialized)) => {
+            faction_select_scene::update(&mut local_state, &player_state_deserialized, &faction_states_deserialized, &metastate_deserialized);
+            faction_select_scene::draw(&mut local_state, &player_state_deserialized, &faction_states_deserialized, &metastate_deserialized);
+            faction_select_scene::input(&mut local_state, &player_state_deserialized, &faction_states_deserialized, &metastate_deserialized);
         },
-        (enums::GameScenes::IdleGameScene, Some(player_state_deserialized), Some(faction_states_deserialized)) => {
-            idle_game_scene::update(&mut local_state, &player_state_deserialized, &faction_states_deserialized);
-            idle_game_scene::draw(&mut local_state, &player_state_deserialized, &faction_states_deserialized);
-            idle_game_scene::input(&mut local_state, &player_state_deserialized, &faction_states_deserialized);
+        (enums::GameScenes::IdleGameScene, Some(player_state_deserialized), Some(faction_states_deserialized), Some(metastate_deserialized)) => {
+            idle_game_scene::update(&mut local_state, &player_state_deserialized, &faction_states_deserialized, &metastate_deserialized);
+            idle_game_scene::draw(&mut local_state, &player_state_deserialized, &faction_states_deserialized, &metastate_deserialized);
+            idle_game_scene::input(&mut local_state, &player_state_deserialized, &faction_states_deserialized, &metastate_deserialized);
         },
-        (enums::GameScenes::TierUpScene, Some(player_state_deserialized), Some(faction_states_deserialized)) => {
-            tier_up_scene::update(&mut local_state, &player_state_deserialized, &faction_states_deserialized);
-            tier_up_scene::draw(&mut local_state, &player_state_deserialized, &faction_states_deserialized);
-            tier_up_scene::input(&mut local_state, &player_state_deserialized, &faction_states_deserialized);
+        (enums::GameScenes::TierUpScene, Some(player_state_deserialized), Some(faction_states_deserialized), Some(metastate_deserialized)) => {
+            tier_up_scene::update(&mut local_state, &player_state_deserialized, &faction_states_deserialized, &metastate_deserialized);
+            tier_up_scene::draw(&mut local_state, &player_state_deserialized, &faction_states_deserialized, &metastate_deserialized);
+            tier_up_scene::input(&mut local_state, &player_state_deserialized, &faction_states_deserialized, &metastate_deserialized);
         },
-        (enums::GameScenes::LevelUpScene, Some(player_state_deserialized), Some(faction_states_deserialized)) => {
-            level_up_scene::update(&mut local_state, &player_state_deserialized, &faction_states_deserialized);
-            level_up_scene::draw(&mut local_state, &player_state_deserialized, &faction_states_deserialized);
-            level_up_scene::input(&mut local_state, &player_state_deserialized, &faction_states_deserialized);
+        (enums::GameScenes::LevelUpScene, Some(player_state_deserialized), Some(faction_states_deserialized), Some(metastate_deserialized)) => {
+            level_up_scene::update(&mut local_state, &player_state_deserialized, &faction_states_deserialized, &metastate_deserialized);
+            level_up_scene::draw(&mut local_state, &player_state_deserialized, &faction_states_deserialized, &metastate_deserialized);
+            level_up_scene::input(&mut local_state, &player_state_deserialized, &faction_states_deserialized, &metastate_deserialized);
         },
-        (_, _, None) => {
+        (enums::GameScenes::LastFactionWinScene, Some(player_state_deserialized), Some(faction_states_deserialized), Some(metastate_deserialized)) => {
+            last_faction_win_scene::update(&mut local_state, &player_state_deserialized, &faction_states_deserialized, &metastate_deserialized);
+            last_faction_win_scene::draw(&mut local_state, &player_state_deserialized, &faction_states_deserialized, &metastate_deserialized);
+            last_faction_win_scene::input(&mut local_state, &player_state_deserialized, &faction_states_deserialized, &metastate_deserialized);
+        },
+        (_, _, _, None) => {
+            // create metastate
+            os::client::exec(PROGRAM_ID, "create_meta_state_data", &[]);
+        },
+        (_, _, None, _) => {
             // log!("CREATE FACTIONS");
             os::client::exec(PROGRAM_ID, "create_faction_data", &borsh::to_vec(&enums::Factions::Green).unwrap());
             os::client::exec(PROGRAM_ID, "create_faction_data", &borsh::to_vec(&enums::Factions::Orange).unwrap());
             os::client::exec(PROGRAM_ID, "create_faction_data", &borsh::to_vec(&enums::Factions::Purple).unwrap());
         },
-        (_, None, _) => {
+        (_, None, _, _) => {
             // log!("CREATE PLAYER");
             os::client::exec(PROGRAM_ID, "create_player_data", &borsh::to_vec(&enums::Factions::NoFaction).unwrap());
         },
     }
 
-    // temp reset
-    if gamepad(0).up.just_pressed() {
-        os::client::exec(PROGRAM_ID, "temp_reset_game", &[]);
+    //
+    // TESTING AREA
+    //
+    let test_read = os::client::read_file(PROGRAM_ID, "metastate");
+    if test_read.is_ok() {
+        log!{"{:?}", states::MetaState::try_from_slice(&test_read.clone().unwrap().contents).unwrap().last_faction_win};
+        log!{"{:?}", states::MetaState::try_from_slice(&test_read.clone().unwrap().contents).unwrap().player_list};
     }
 
     local_state.save();

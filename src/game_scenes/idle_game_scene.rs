@@ -1,13 +1,13 @@
 use crate::*;
 
-pub fn update(local_state: &mut LocalState, player_state_deserialized: &states::PlayerState, _faction_states_deserialized: &(states::FactionState, states::FactionState, states::FactionState)) -> () {
+pub fn update(local_state: &mut LocalState, player_state_deserialized: &states::PlayerState, _faction_states_deserialized: &(states::FactionState, states::FactionState, states::FactionState), _metastate_deserialized: &states::MetaState) -> () {
     // read the player state to see if the bool is flipped basically
     if !player_state_deserialized.did_accept_level_up {
         local_state.game_scene = enums::GameScenes::LevelUpScene;
     }
 }
 
-pub fn draw(local_state: &mut LocalState, player_state_deserialized: &states::PlayerState, faction_states_deserialized: &(states::FactionState, states::FactionState, states::FactionState)) -> () {  
+pub fn draw(local_state: &mut LocalState, player_state_deserialized: &states::PlayerState, faction_states_deserialized: &(states::FactionState, states::FactionState, states::FactionState), metastate_deserialized: &states::MetaState) -> () {  
     let (green_faction_deserialized, orange_faction_deserialized, purple_faction_deserialized) = faction_states_deserialized;
     // *** DRAW *** //
 
@@ -21,6 +21,13 @@ pub fn draw(local_state: &mut LocalState, player_state_deserialized: &states::Pl
     // light sprite moving
     sprite!("lights_overlay", x = {98 + (tick() % 36 / 4) * 24}, y = 63);
 
+    // draw correct button based on winning faction
+    match metastate_deserialized.last_faction_win {
+        enums::Factions::Green => sprite!("green_badge", x = 326, y = 29),
+        enums::Factions::Purple => sprite!("purple_badge", x = 326, y = 29),
+        enums::Factions::Orange => sprite!("orange_badge", x = 326, y = 29),
+        enums::Factions::NoFaction => ()
+    }
 
     // draw correct UI based on player faction
     match player_state_deserialized.faction {
@@ -228,12 +235,24 @@ pub fn draw(local_state: &mut LocalState, player_state_deserialized: &states::Pl
             match player_state_deserialized.faction {
                 enums::Factions::Green => {
                     sprite!("egghead_green_press", x = 168, y = 121);
+                    if metastate_deserialized.last_faction_win == enums::Factions::Green {
+                        // CROWN
+                        sprite!("jester_hat_02", x = 160, y = 107);
+                    }
                 },
                 enums::Factions::Orange => {
                     sprite!("egghead_orange_press", x = 168, y = 121);
+                    if metastate_deserialized.last_faction_win == enums::Factions::Orange {
+                        // CROWN
+                        sprite!("jester_hat_02", x = 160, y = 107);
+                    }
                 },
                 enums::Factions::Purple => {
                     sprite!("egghead_purple_press", x = 168, y = 121);
+                    if metastate_deserialized.last_faction_win == enums::Factions::Purple {
+                        // CROWN
+                        sprite!("jester_hat_02", x = 160, y = 107);
+                    } 
                 },
                 enums::Factions::NoFaction => ()
             }
@@ -245,12 +264,24 @@ pub fn draw(local_state: &mut LocalState, player_state_deserialized: &states::Pl
             match player_state_deserialized.faction {
                 enums::Factions::Green => {
                     sprite!("egghead_green_release", x = 168, y = 121);
+                    if metastate_deserialized.last_faction_win == enums::Factions::Green {
+                        // CROWN
+                        sprite!("jester_hat_01", x = 161, y = 107);
+                    } 
                 },
                 enums::Factions::Orange => {
                     sprite!("egghead_orange_release", x = 168, y = 121);
+                    if metastate_deserialized.last_faction_win == enums::Factions::Orange {
+                        // CROWN
+                        sprite!("jester_hat_01", x = 161, y = 107);
+                    } 
                 },
                 enums::Factions::Purple => {
                     sprite!("egghead_purple_release", x = 168, y = 121);
+                    if metastate_deserialized.last_faction_win == enums::Factions::Purple {
+                        // CROWN
+                        sprite!("jester_hat_01", x = 161, y = 107);
+                    } 
                 },
                 enums::Factions::NoFaction => ()
             }
@@ -269,7 +300,7 @@ pub fn draw(local_state: &mut LocalState, player_state_deserialized: &states::Pl
     }
 }
 
-pub fn input(local_state: &mut LocalState, player_state_deserialized: &states::PlayerState, _faction_states_deserialized: &(states::FactionState, states::FactionState, states::FactionState)) -> () {
+pub fn input(local_state: &mut LocalState, player_state_deserialized: &states::PlayerState, _faction_states_deserialized: &(states::FactionState, states::FactionState, states::FactionState), _metastate_deserialized: &states::MetaState) -> () {
     // *** INPUT *** //
 
     if gamepad(0).start.just_pressed() {

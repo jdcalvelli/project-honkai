@@ -27,13 +27,27 @@ unsafe extern "C" fn on_increment_faction_level() -> usize {
 	let mut current_faction_deserialized = states::FactionState::try_from_slice(&read_result.unwrap()).unwrap();
 	current_faction_deserialized.current_level += 1;
 
+	// faction win, cause reset
 	if current_faction_deserialized.current_level == current_faction_deserialized.max_level {
-		// faction win, cause reset
-		// just write empty vec to all the factions
-		// this resets factions, but not players
-		// need some way to reset players as a result of this
-		let write_result = os::server::write_file("factions/green", &[]);
 
+		// read the faction state file
+		let read_result = os::server::read_file("metastate");
+		if read_result.is_err() {
+			return os::server::CANCEL
+		}
+
+		let mut current_meta_state_deserialized = states::MetaState::try_from_slice(&read_result.unwrap()).unwrap();
+		current_meta_state_deserialized.last_faction_win = function_input_deserialized;
+
+		// set faction win 
+		let write_result = os::server::write_file("metastate", &current_meta_state_deserialized.try_to_vec().unwrap());
+		if write_result.is_err() {
+			return os::server::CANCEL
+		}
+
+		// this resets factions, but not players
+		// just write empty vec to all the factions
+		let write_result = os::server::write_file("factions/green", &[]);
 		if write_result.is_err() {
 			return os::server::CANCEL
 		}
@@ -48,6 +62,26 @@ unsafe extern "C" fn on_increment_faction_level() -> usize {
 			return os::server::CANCEL
 		}
 
+		// reset all players
+		for player in current_meta_state_deserialized.player_list.iter() {
+			let read_result = os::server::read_file(&format!("players/{player}"));
+			if read_result.is_err() {
+				return os::server::CANCEL
+			}
+			let mut current_player_data_deserialized = states::PlayerState::try_from_slice(&read_result.unwrap()).unwrap();
+			// this is basically the playerstate::new just i dont want to reset the mf uh faction
+			let faction_to_keep = current_player_data_deserialized.faction;
+			current_player_data_deserialized = states::PlayerState::new();
+			current_player_data_deserialized.faction = faction_to_keep;
+			current_player_data_deserialized.did_accept_last_faction_winner = false;
+			// write
+			let write_result = os::server::write_file(&format!("players/{player}"), 
+				&current_player_data_deserialized.try_to_vec().unwrap());
+			if write_result.is_err() {
+				return os::server::CANCEL
+			}
+		}
+
 		os::server::alert!("RESET");
 
 		os::server::COMMIT
@@ -55,7 +89,7 @@ unsafe extern "C" fn on_increment_faction_level() -> usize {
 	else {
 		// write change
 		let write_result = os::server::write_file(&format!("factions/{faction_in_question_as_str}"), 
-		&current_faction_deserialized.try_to_vec().unwrap());
+			&current_faction_deserialized.try_to_vec().unwrap());
 		if write_result.is_err() {
 			return os::server::CANCEL
 		}

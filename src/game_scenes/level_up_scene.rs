@@ -1,15 +1,10 @@
 use crate::*;
 
-pub fn update(local_state: &mut LocalState, player_state_deserialized: &states::PlayerState, _faction_states_deserialized: &(states::FactionState, states::FactionState, states::FactionState)) -> () {
+pub fn update(local_state: &mut LocalState, player_state_deserialized: &states::PlayerState, _faction_states_deserialized: &(states::FactionState, states::FactionState, states::FactionState), _metastate_deserialized: &states::MetaState) -> () {
     // *** UPDATE *** //  
 
     if player_state_deserialized.did_accept_level_up {
-        if !player_state_deserialized.did_accept_tier_up {
-            local_state.game_scene = enums::GameScenes::TierUpScene;
-        }
-        else {
-            local_state.game_scene = enums::GameScenes::IdleGameScene;   
-        }
+        local_state.game_scene = enums::GameScenes::IdleGameScene;
     }
 
     if tick() % 16 == 0 {
@@ -17,7 +12,7 @@ pub fn update(local_state: &mut LocalState, player_state_deserialized: &states::
     }
 }
 
-pub fn draw(local_state: &mut LocalState, _player_state_deserialized: &states::PlayerState, _faction_states_deserialized: &(states::FactionState, states::FactionState, states::FactionState)) -> () {
+pub fn draw(local_state: &mut LocalState, _player_state_deserialized: &states::PlayerState, _faction_states_deserialized: &(states::FactionState, states::FactionState, states::FactionState), _metastate_deserialized: &states::MetaState) -> () {
     // *** DRAW *** //
 
     // background
@@ -45,7 +40,7 @@ pub fn draw(local_state: &mut LocalState, _player_state_deserialized: &states::P
     }
 }
 
-pub fn input(local_state: &mut LocalState, _player_state_deserialized: &states::PlayerState, _faction_states_deserialized: &(states::FactionState, states::FactionState, states::FactionState)) -> () {
+pub fn input(local_state: &mut LocalState, _player_state_deserialized: &states::PlayerState, _faction_states_deserialized: &(states::FactionState, states::FactionState, states::FactionState), _metastate_deserialized: &states::MetaState) -> () {
 	if gamepad(0).start.just_pressed() {
         local_state.egghead_state = true;
         // now i need a transaction to set flag back
