@@ -12,31 +12,27 @@ pub fn update(local_state: &mut LocalState, player_state_deserialized: &states::
     }
 }
 
-pub fn draw(local_state: &mut LocalState, _player_state_deserialized: &states::PlayerState, _faction_states_deserialized: &(states::FactionState, states::FactionState, states::FactionState), _metastate_deserialized: &states::MetaState) -> () {
+pub fn draw(local_state: &mut LocalState, player_state_deserialized: &states::PlayerState, _faction_states_deserialized: &(states::FactionState, states::FactionState, states::FactionState), _metastate_deserialized: &states::MetaState) -> () {
     // *** DRAW *** //
 
-    // background
-    sprite!("background_layer", x = 0, y = 0);
-    sprite!("outerframe_layer", x = 0, y = 0);
-
     sprite!("level_up", x = 79, y = 20);
+
+    match player_state_deserialized.items[0].item_type {
+        enums::ItemTypes::NoItem => (),
+        enums::ItemTypes::Stapler => sprite!("item_stapler", x = 180, y = 92),
+        enums::ItemTypes::BendedFolder => sprite!("item_bended_folder", x = 181, y = 88),
+        enums::ItemTypes::YogurtCup => sprite!("item_yogurt", x = 183, y = 88),
+        enums::ItemTypes::UsedNapkins => sprite!("item_used_napkin", x = 182, y = 88),
+        enums::ItemTypes::Eggs => sprite!("item_eggs", x = 180, y = 89),
+        enums::ItemTypes::Books => sprite!("item_books", x = 180, y = 82),
+        enums::ItemTypes::Box => sprite!("item_box", x = 180, y = 88),
+    }
 
     if local_state.view_flip {
         sprite!("red_claim_01", x = 150, y = 148);
     }
     else {
         sprite!("red_claim_02", x = 150, y = 148);
-    }
-    
-    // not on the computer screen
-    sprite!("bg_keyboard", x = 0, y = 210);
-    if local_state.egghead_state {
-        sprite!("spacebar_02", x = 126, y = 269);
-        sprite!("hand_02", x = 48, y = 266);
-    }
-    else {
-        sprite!("spacebar_01", x = 126, y = 268);
-        sprite!("hand_01", x = 47, y = 263);
     }
 }
 

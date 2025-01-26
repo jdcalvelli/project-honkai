@@ -5,15 +5,14 @@ pub fn update(local_state: &mut LocalState, player_state_deserialized: &states::
     if !player_state_deserialized.did_accept_level_up {
         local_state.game_scene = enums::GameScenes::LevelUpScene;
     }
+
+    // testing
+    log!("{:?}", player_state_deserialized.items);
 }
 
 pub fn draw(local_state: &mut LocalState, player_state_deserialized: &states::PlayerState, faction_states_deserialized: &(states::FactionState, states::FactionState, states::FactionState), metastate_deserialized: &states::MetaState) -> () {  
     let (green_faction_deserialized, orange_faction_deserialized, purple_faction_deserialized) = faction_states_deserialized;
     // *** DRAW *** //
-
-    // background
-    sprite!("background_layer", x = 0, y = 0);
-    sprite!("outerframe_layer", x = 0, y = 0);
 
     // ui
     sprite!("ui_faction_bar", x = 38, y = 21);
@@ -222,6 +221,21 @@ pub fn draw(local_state: &mut LocalState, player_state_deserialized: &states::Pl
 
     // pedestal
     sprite!("platform_layer", x = 50, y = 150);
+    // NOW THE ITEM SPRITE!
+    let t = (tick() / 8) as f32;
+    let s = 2. * t.sin();
+    if player_state_deserialized.did_accept_level_up {
+        match player_state_deserialized.items[0].item_type {
+            enums::ItemTypes::NoItem => (),
+            enums::ItemTypes::Stapler => sprite!("item_stapler", x = 83., y = 149. + s),
+            enums::ItemTypes::BendedFolder => sprite!("item_bended_folder", x = 84., y = 142. + s),
+            enums::ItemTypes::YogurtCup => sprite!("item_yogurt", x = 87., y = 144. + s),
+            enums::ItemTypes::UsedNapkins => sprite!("item_used_napkin", x = 85., y = 145. + s),
+            enums::ItemTypes::Eggs => sprite!("item_eggs", x = 84., y = 146. + s),
+            enums::ItemTypes::Books => sprite!("item_books", x = 83., y = 135. + s),
+            enums::ItemTypes::Box => sprite!("item_box", x = 83., y = 144. + s),
+        }
+    }
 
     // foreground
     sprite!("seat", x = 174, y = 163);
@@ -286,17 +300,6 @@ pub fn draw(local_state: &mut LocalState, player_state_deserialized: &states::Pl
                 enums::Factions::NoFaction => ()
             }
         },
-    }
-    
-    // not on the computer screen
-    sprite!("bg_keyboard", x = 0, y = 210);
-    if local_state.egghead_state {
-        sprite!("spacebar_02", x = 126, y = 269);
-        sprite!("hand_02", x = 48, y = 266);
-    }
-    else {
-        sprite!("spacebar_01", x = 126, y = 268);
-        sprite!("hand_01", x = 47, y = 263);
     }
 }
 

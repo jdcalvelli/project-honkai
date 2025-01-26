@@ -1,7 +1,5 @@
 use crate::*;
 
-
-
 #[derive(Debug, Clone, PartialEq, BorshDeserialize, BorshSerialize)]
 pub struct MetaState {
 	pub last_faction_win: enums::Factions,

@@ -15,11 +15,6 @@ pub fn update(local_state: &mut LocalState, player_state_deserialized: &states::
 pub fn draw(local_state: &mut LocalState, _player_state_deserialized: &states::PlayerState, _faction_states_deserialized: &(states::FactionState, states::FactionState, states::FactionState), _metastate_deserialized: &states::MetaState) -> () {
     // *** DRAW *** //
 
-    // background
-    sprite!("background_layer", x = 0, y = 0);
-
-    sprite!("outerframe_layer", x = 0, y = 0);
-
     sprite!("txt_select_your_suit", x = 62, y = 23);
 
     sprite!("choose_orange", x = 48, y = 51);
@@ -67,17 +62,6 @@ pub fn draw(local_state: &mut LocalState, _player_state_deserialized: &states::P
     else {
         sprite!("arrow_left", x = 32, y = 22);
         sprite!("arrow_right", x = 329, y = 22);
-    }
-    
-    // not on the computer screen
-    sprite!("bg_keyboard", x = 0, y = 210);
-    if local_state.egghead_state {
-        sprite!("spacebar_02", x = 126, y = 269);
-        sprite!("hand_02", x = 48, y = 266);
-    }
-    else {
-        sprite!("spacebar_01", x = 126, y = 268);
-        sprite!("hand_01", x = 47, y = 263);
     }
 }
 

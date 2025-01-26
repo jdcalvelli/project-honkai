@@ -1,4 +1,5 @@
 mod utils;
+mod structs;
 mod states;
 mod enums;
 mod game_scenes;
@@ -48,6 +49,8 @@ impl LocalState {
 turbo::go! ({
     let mut local_state = LocalState::load();
 
+    // background true of every scene
+
     sprite!("background_layer", x = 0, y = 0);
     sprite!("outerframe_layer", x = 0, y = 0);
     sprite!("bg_keyboard", x = 0, y = 210);
@@ -60,6 +63,8 @@ turbo::go! ({
         sprite!("hand_01", x = 47, y = 263);
     }
 
+    // check for reset event
+
     if let Some(event) = os::client::watch_events(PROGRAM_ID, Some("alert")).data {
         // if the time of the current event is not the same as the last one saved
         if event.created_at != local_state.last_event_time {
@@ -71,10 +76,25 @@ turbo::go! ({
         }
     }
 
+    // more robust scene management
     // get user id, for use across scenes
     let user_id = os::client::user_id().unwrap();
 
     match (local_state.game_scene, utils::deserialize_player(&user_id), utils::deserialize_factions(), utils::deserialize_metastate()) {
+        (_, _, _, None) => {
+            // create metastate
+            os::client::exec(PROGRAM_ID, "create_meta_state_data", &[]);
+        },
+        (_, _, None, _) => {
+            // log!("CREATE FACTIONS");
+            os::client::exec(PROGRAM_ID, "create_faction_data", &borsh::to_vec(&enums::Factions::Green).unwrap());
+            os::client::exec(PROGRAM_ID, "create_faction_data", &borsh::to_vec(&enums::Factions::Orange).unwrap());
+            os::client::exec(PROGRAM_ID, "create_faction_data", &borsh::to_vec(&enums::Factions::Purple).unwrap());
+        },
+        (_, None, _, _) => {
+            // log!("CREATE PLAYER");
+            os::client::exec(PROGRAM_ID, "create_player_data", &borsh::to_vec(&enums::Factions::NoFaction).unwrap());
+        },
         (enums::GameScenes::MainMenuScene, Some(player_state_deserialized), Some(faction_states_deserialized), Some(metastate_deserialized)) => {
             main_menu_scene::update(&mut local_state, &player_state_deserialized, &faction_states_deserialized, &metastate_deserialized);
             main_menu_scene::draw(&mut local_state, &player_state_deserialized, &faction_states_deserialized, &metastate_deserialized);
@@ -104,31 +124,17 @@ turbo::go! ({
             last_faction_win_scene::update(&mut local_state, &player_state_deserialized, &faction_states_deserialized, &metastate_deserialized);
             last_faction_win_scene::draw(&mut local_state, &player_state_deserialized, &faction_states_deserialized, &metastate_deserialized);
             last_faction_win_scene::input(&mut local_state, &player_state_deserialized, &faction_states_deserialized, &metastate_deserialized);
-        },
-        (_, _, _, None) => {
-            // create metastate
-            os::client::exec(PROGRAM_ID, "create_meta_state_data", &[]);
-        },
-        (_, _, None, _) => {
-            // log!("CREATE FACTIONS");
-            os::client::exec(PROGRAM_ID, "create_faction_data", &borsh::to_vec(&enums::Factions::Green).unwrap());
-            os::client::exec(PROGRAM_ID, "create_faction_data", &borsh::to_vec(&enums::Factions::Orange).unwrap());
-            os::client::exec(PROGRAM_ID, "create_faction_data", &borsh::to_vec(&enums::Factions::Purple).unwrap());
-        },
-        (_, None, _, _) => {
-            // log!("CREATE PLAYER");
-            os::client::exec(PROGRAM_ID, "create_player_data", &borsh::to_vec(&enums::Factions::NoFaction).unwrap());
-        },
+        }
     }
 
     //
     // TESTING AREA
     //
-    let test_read = os::client::read_file(PROGRAM_ID, "metastate");
-    if test_read.is_ok() {
-        log!{"{:?}", states::MetaState::try_from_slice(&test_read.clone().unwrap().contents).unwrap().last_faction_win};
-        log!{"{:?}", states::MetaState::try_from_slice(&test_read.clone().unwrap().contents).unwrap().player_list};
-    }
+    // let test_read = os::client::read_file(PROGRAM_ID, "metastate");
+    // if test_read.is_ok() {
+    //     // log!{"{:?}", states::MetaState::try_from_slice(&test_read.clone().unwrap().contents).unwrap().last_faction_win};
+    //     // log!{"{:?}", states::MetaState::try_from_slice(&test_read.clone().unwrap().contents).unwrap().player_list};
+    // }
 
     local_state.save();
 });

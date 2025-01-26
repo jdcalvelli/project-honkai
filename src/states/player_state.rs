@@ -3,6 +3,7 @@ use crate::*;
 #[derive(Debug, Clone, PartialEq, BorshDeserialize, BorshSerialize)]
 pub struct PlayerState {
 	pub faction: enums::Factions,
+	pub items: Vec<structs::Item>,
 	pub current_tier: u64,
 	pub current_level_in_tier: u64,
 	pub current_xp: u64,
@@ -17,6 +18,7 @@ impl PlayerState {
 	pub fn new() -> Self {
 		Self {
 			faction: enums::Factions::NoFaction,
+			items: vec![structs::Item::new(enums::ItemTypes::NoItem, 0xffffffff)],
 			current_tier: 0,
 			current_level_in_tier: 0,
 			current_xp: 0,
