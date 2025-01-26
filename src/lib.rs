@@ -29,6 +29,9 @@ turbo::init! {
         selector_pos: u16,
         egghead_state: bool,
         last_event_time: u32,
+        item_name: String,
+        has_broken_level_up: bool,
+        has_broken_computer: bool
     } = {
         Self::new()
     }
@@ -41,7 +44,10 @@ impl LocalState {
             view_flip: true,
             selector_pos: 0,
             egghead_state: false,
-            last_event_time: 0
+            last_event_time: 0,
+            item_name: "".to_string(),
+            has_broken_level_up: false,
+            has_broken_computer: false,
         }
     }
 }
@@ -52,7 +58,23 @@ turbo::go! ({
     // background true of every scene
 
     sprite!("background_layer", x = 0, y = 0);
-    sprite!("outerframe_layer", x = 0, y = 0);
+
+    // multiply the length of item_name by 5
+    let item_name_length = local_state.item_name.len() * 5;
+    if item_name_length >= 220 {
+        local_state.has_broken_level_up = true;
+    }
+    if item_name_length >= 270 {
+        local_state.has_broken_computer = true;
+    }
+
+    if local_state.has_broken_computer {
+        sprite!("outerframe_layer_broken", x = 16, y = 0);
+    }
+    else {
+        sprite!("outerframe_layer", x = 16, y = 0);
+    }
+
     sprite!("bg_keyboard", x = 0, y = 210);
     if local_state.egghead_state {
         sprite!("spacebar_02", x = 126, y = 269);

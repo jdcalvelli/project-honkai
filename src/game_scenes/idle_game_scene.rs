@@ -6,6 +6,8 @@ pub fn update(local_state: &mut LocalState, player_state_deserialized: &states::
         local_state.game_scene = enums::GameScenes::LevelUpScene;
     }
 
+    local_state.item_name = "".to_string();
+
     // testing
     log!("{:?}", player_state_deserialized.items);
 }
@@ -21,10 +23,12 @@ pub fn draw(local_state: &mut LocalState, player_state_deserialized: &states::Pl
     sprite!("lights_overlay", x = {98 + (tick() % 36 / 4) * 24}, y = 63);
 
     // draw correct button based on winning faction
+    let t = (tick() / 8) as f32;
+    let s = 2. * t.sin();
     match metastate_deserialized.last_faction_win {
-        enums::Factions::Green => sprite!("green_badge", x = 326, y = 29),
-        enums::Factions::Purple => sprite!("purple_badge", x = 326, y = 29),
-        enums::Factions::Orange => sprite!("orange_badge", x = 326, y = 29),
+        enums::Factions::Green => sprite!("green_badge", x = 326, y = 29, rotate = 5. * s),
+        enums::Factions::Purple => sprite!("purple_badge", x = 326, y = 29, rotate = 5. * s),
+        enums::Factions::Orange => sprite!("orange_badge", x = 326, y = 29, rotate = 5. * s),
         enums::Factions::NoFaction => ()
     }
 
@@ -174,6 +178,17 @@ pub fn draw(local_state: &mut LocalState, player_state_deserialized: &states::Pl
             // purple faction card
             sprite!("ui_faction_profile_purple", x = 272, y = 121);
         },
+        enums::Factions::NoFaction => (),
+    }
+
+    text!("TOTAL", x = 314, y = 142, color = 0x000000ff, font = Font::S);
+    text!("SUIT", x = 314, y = 148, color = 0x000000ff, font = Font::S);
+    text!("WINS:", x = 314, y = 154, color = 0x000000ff, font = Font::S);
+
+    match player_state_deserialized.faction {
+        enums::Factions::Green => text!(&format!("{}", metastate_deserialized.green_total_wins), x = 314, y = 160, color = 0x000000ff, font = Font::M),
+        enums::Factions::Orange => text!(&format!("{}", metastate_deserialized.orange_total_wins), x = 314, y = 160, color = 0x000000ff, font = Font::M),
+        enums::Factions::Purple => text!(&format!("{}", metastate_deserialized.purple_total_wins), x = 314, y = 160, color = 0x000000ff, font = Font::M),
         enums::Factions::NoFaction => (),
     }
 

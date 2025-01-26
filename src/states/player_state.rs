@@ -25,7 +25,7 @@ impl PlayerState {
 			xp_needed_for_prev_level: 0,
 			// this val is ultimately dependant on the equation used level to level, so be sure to change here too
 			// if equation changes
-			xp_needed_for_next_level: 6,
+			xp_needed_for_next_level: 3,
 			did_accept_level_up: true,
 			did_accept_tier_up: true,
 			did_accept_last_faction_winner: true,

@@ -21,9 +21,9 @@ unsafe extern "C" fn on_increment_player_xp() -> usize {
 		// then we need to set the prev needed level xp to whatever currently next needed level xp is
 		current_player_deserialized.xp_needed_for_prev_level = current_player_deserialized.xp_needed_for_next_level;
 		// then we calculate what the next level xp needs to be
-		// currently, the equation is new level + 1 to the 3th power + 5
+		// currently, the equation is new level to the 2th power + 5?
 		current_player_deserialized.xp_needed_for_next_level = 
-			(current_player_deserialized.current_level_in_tier + 1).pow(1) + 5;
+			(current_player_deserialized.current_level_in_tier + 1).pow(2) + 5;
 	
 		current_player_deserialized.did_accept_level_up = false;
 
@@ -45,7 +45,7 @@ unsafe extern "C" fn on_increment_player_xp() -> usize {
 		current_player_deserialized.xp_needed_for_prev_level = 0;
 		// this 6 value is based on the current equation which can be found in player_state.rs
 		// assumption rn is that it will be the same xp curve regardless of tier
-		current_player_deserialized.xp_needed_for_next_level = 6;
+		current_player_deserialized.xp_needed_for_next_level = 3;
 	
 		current_player_deserialized.did_accept_tier_up = false;
 	}

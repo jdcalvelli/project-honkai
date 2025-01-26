@@ -30,7 +30,7 @@ unsafe extern "C" fn on_increment_faction_level() -> usize {
 	// faction win, cause reset
 	if current_faction_deserialized.current_level == current_faction_deserialized.max_level {
 
-		// read the faction state file
+		// read the meta state file
 		let read_result = os::server::read_file("metastate");
 		if read_result.is_err() {
 			return os::server::CANCEL
@@ -38,6 +38,13 @@ unsafe extern "C" fn on_increment_faction_level() -> usize {
 
 		let mut current_meta_state_deserialized = states::MetaState::try_from_slice(&read_result.unwrap()).unwrap();
 		current_meta_state_deserialized.last_faction_win = function_input_deserialized;
+
+		match function_input_deserialized {
+		    enums::Factions::Green => current_meta_state_deserialized.green_total_wins += 1,
+		    enums::Factions::Orange => current_meta_state_deserialized.orange_total_wins += 1,
+		    enums::Factions::Purple => current_meta_state_deserialized.purple_total_wins += 1,
+		    enums::Factions::NoFaction => (),
+		}
 
 		// set faction win 
 		let write_result = os::server::write_file("metastate", &current_meta_state_deserialized.try_to_vec().unwrap());
