@@ -7,7 +7,7 @@ mod server_funcs;
 
 use game_scenes::*;
 
-static PROGRAM_ID: &str = "asdfghjklTEMP";
+static PROGRAM_ID: &str = "asdfghjkl";
 
 turbo::cfg! {r#"
     name = "project-honkai"
