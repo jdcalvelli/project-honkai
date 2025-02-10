@@ -33,12 +33,12 @@ pub fn draw(local_state: &mut LocalState, _player_state_deserialized: &states::P
 }
 
 pub fn input(local_state: &mut LocalState, _player_state_deserialized: &states::PlayerState, _faction_states_deserialized: &(states::FactionState, states::FactionState, states::FactionState), _metastate_deserialized: &states::MetaState) -> () {
-    if gamepad(0).start.just_pressed() {
+    if gamepad(0).start.just_pressed() || mouse(0).left.just_pressed() {
         local_state.egghead_state = true;
         // now i need a transaction to set flag back
         os::client::exec(PROGRAM_ID, "acknowledge_last_faction_winner", &[]);
     }
-    else if gamepad(0).start.just_released() {
+    else if gamepad(0).start.just_released() || mouse(0).left.just_released() {
         local_state.egghead_state = false;
     }
 }

@@ -7,11 +7,11 @@ mod server_funcs;
 
 use game_scenes::*;
 
-static PROGRAM_ID: &str = "asdfghjkl";
+static PROGRAM_ID: &str = "asdfghjklTEMP";
 
 turbo::cfg! {r#"
     name = "project-honkai"
-    version = "0.1.0"
+    version = "1.1.0"
     author = "jd calvelli and devinne moses"
     description = "a game about modern games"
     [settings]
@@ -66,13 +66,6 @@ turbo::go! ({
     }
     if item_name_length >= 270 {
         local_state.has_broken_computer = true;
-    }
-
-    if local_state.has_broken_computer {
-        sprite!("outerframe_layer_broken", x = 16, y = 0);
-    }
-    else {
-        sprite!("outerframe_layer", x = 16, y = 0);
     }
 
     sprite!("bg_keyboard", x = 0, y = 210);
@@ -147,6 +140,13 @@ turbo::go! ({
             last_faction_win_scene::draw(&mut local_state, &player_state_deserialized, &faction_states_deserialized, &metastate_deserialized);
             last_faction_win_scene::input(&mut local_state, &player_state_deserialized, &faction_states_deserialized, &metastate_deserialized);
         }
+    }
+
+    if local_state.has_broken_computer {
+        sprite!("outerframe_layer_broken", x = 16, y = 0);
+    }
+    else {
+        sprite!("outerframe_layer", x = 16, y = 0);
     }
 
     //

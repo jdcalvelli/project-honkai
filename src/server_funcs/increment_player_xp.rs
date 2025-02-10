@@ -33,7 +33,10 @@ unsafe extern "C" fn on_increment_player_xp() -> usize {
 		let rand_item_type: enums::ItemTypes = unsafe {std::mem::transmute(rand_num)};
 		// generate a random item
 		// STILL NEED TO DO RANDOM COLOR
-		let player_item = structs::Item::new(rand_item_type, 0xffffffff);
+		let color_options: Vec<u32> = vec![0x00A5E3ff, 0x8DD7BFff, 0xFF96C5ff, 0xFF5768ff, 0xFFBF65ff, 0xFC6238ff, 0xFFD872ff, 0xF2D4CCff, 0xE77577ff, 0x6C88C4ff, 0xC05780ff, 0xFF828Bff, 0xE7C582ff, 0x00B0BAff, 0x0065A2ff, 0x00CDACff, 0xFFDACCff, 0xCFF800ff, 0xFF5C77ff, 0x4DD091ff, 0xFFEC59ff, 0xFFA23Aff];
+		let mut rand_num: usize = os::server::random_number();
+		rand_num = rand_num % color_options.len(); 
+		let player_item = structs::Item::new(rand_item_type, color_options[rand_num]);
 		current_player_deserialized.items.insert(0, player_item);
 	}
 	// if the players level is high enough to tier up, also tier up the player

@@ -48,7 +48,7 @@ pub fn draw(local_state: &mut LocalState, player_state_deserialized: &states::Pl
                     234.
                 ),
                 h = 4,
-                color = 0x008000ff
+                color = 0x49aa10ff
             );
             // smaller purple bar
             rect!(
@@ -62,7 +62,7 @@ pub fn draw(local_state: &mut LocalState, player_state_deserialized: &states::Pl
                     234.
                 ),
                 h = 2,
-                color = 0x800080ff
+                color = 0x9241f3ff
             );
             // smaller orange bar
             rect!(
@@ -76,7 +76,7 @@ pub fn draw(local_state: &mut LocalState, player_state_deserialized: &states::Pl
                     234.
                 ),
                 h = 2,
-                color = 0xffa500ff
+                color = 0xc37100ff
             );
 
             // green faction card
@@ -96,7 +96,7 @@ pub fn draw(local_state: &mut LocalState, player_state_deserialized: &states::Pl
                     234.
                 ),
                 h = 6,
-                color = 0xffa500ff
+                color = 0xc37100ff
             );
             // smaller green bar
             rect!(
@@ -110,7 +110,7 @@ pub fn draw(local_state: &mut LocalState, player_state_deserialized: &states::Pl
                     234.
                 ),
                 h = 2,
-                color = 0x008000ff
+                color = 0x49aa10ff
             );
             // smaller purple bar
             rect!(
@@ -124,7 +124,7 @@ pub fn draw(local_state: &mut LocalState, player_state_deserialized: &states::Pl
                     234.
                 ),
                 h = 2,
-                color = 0x800080ff
+                color = 0x9241f3ff
             );
 
             // orange faction card
@@ -144,7 +144,7 @@ pub fn draw(local_state: &mut LocalState, player_state_deserialized: &states::Pl
                     234.
                 ),
                 h = 6,
-                color = 0x800080ff
+                color = 0x9241f3ff
             );
             // smaller orange bar
             rect!(
@@ -158,7 +158,7 @@ pub fn draw(local_state: &mut LocalState, player_state_deserialized: &states::Pl
                     234.
                 ),
                 h = 2,
-                color = 0xffa500ff
+                color = 0xc37100ff
             );
             // smaller green bar
             rect!(
@@ -172,7 +172,7 @@ pub fn draw(local_state: &mut LocalState, player_state_deserialized: &states::Pl
                     234.
                 ),
                 h = 2,
-                color = 0x008000ff
+                color = 0x49aa10ff
             );
 
             // purple faction card
@@ -242,13 +242,13 @@ pub fn draw(local_state: &mut LocalState, player_state_deserialized: &states::Pl
     if player_state_deserialized.did_accept_level_up {
         match player_state_deserialized.items[0].item_type {
             enums::ItemTypes::NoItem => (),
-            enums::ItemTypes::Stapler => sprite!("item_stapler", x = 83., y = 149. + s),
-            enums::ItemTypes::BendedFolder => sprite!("item_bended_folder", x = 84., y = 142. + s),
-            enums::ItemTypes::YogurtCup => sprite!("item_yogurt", x = 87., y = 144. + s),
-            enums::ItemTypes::UsedNapkins => sprite!("item_used_napkin", x = 85., y = 145. + s),
-            enums::ItemTypes::Eggs => sprite!("item_eggs", x = 84., y = 146. + s),
-            enums::ItemTypes::Books => sprite!("item_books", x = 83., y = 135. + s),
-            enums::ItemTypes::Box => sprite!("item_box", x = 83., y = 144. + s),
+            enums::ItemTypes::Stapler => sprite!("item_stapler", x = 83., y = 149. + s, color = player_state_deserialized.items[0].color),
+            enums::ItemTypes::BendedFolder => sprite!("item_bended_folder", x = 84., y = 142. + s, color = player_state_deserialized.items[0].color),
+            enums::ItemTypes::YogurtCup => sprite!("item_yogurt", x = 87., y = 144. + s, color = player_state_deserialized.items[0].color),
+            enums::ItemTypes::UsedNapkins => sprite!("item_used_napkin", x = 85., y = 145. + s, color = player_state_deserialized.items[0].color),
+            enums::ItemTypes::Eggs => sprite!("item_eggs", x = 84., y = 146. + s, color = player_state_deserialized.items[0].color),
+            enums::ItemTypes::Books => sprite!("item_books", x = 83., y = 135. + s, color = player_state_deserialized.items[0].color),
+            enums::ItemTypes::Box => sprite!("item_box", x = 83., y = 144. + s, color = player_state_deserialized.items[0].color),
         }
     }
 
@@ -321,7 +321,7 @@ pub fn draw(local_state: &mut LocalState, player_state_deserialized: &states::Pl
 pub fn input(local_state: &mut LocalState, player_state_deserialized: &states::PlayerState, _faction_states_deserialized: &(states::FactionState, states::FactionState, states::FactionState), _metastate_deserialized: &states::MetaState) -> () {
     // *** INPUT *** //
 
-    if gamepad(0).start.just_pressed() {
+    if gamepad(0).start.just_pressed() || mouse(0).left.just_pressed() {
         local_state.egghead_state = true;
         if player_state_deserialized.current_xp == player_state_deserialized.xp_needed_for_next_level - 1 {
             os::client::exec(PROGRAM_ID, "increment_player_xp", &[]);
@@ -331,7 +331,7 @@ pub fn input(local_state: &mut LocalState, player_state_deserialized: &states::P
             os::client::exec(PROGRAM_ID, "increment_player_xp", &[]);
         }
     }
-    else if gamepad(0).start.just_released() {
+    else if gamepad(0).start.just_released() || mouse(0).left.just_released() {
         local_state.egghead_state = false;
     }
 }

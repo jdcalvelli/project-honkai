@@ -3,7 +3,10 @@ use crate::*;
 pub fn update(local_state: &mut LocalState, player_state_deserialized: &states::PlayerState, _faction_states_deserialized: &(states::FactionState, states::FactionState, states::FactionState), _metastate_deserialized: &states::MetaState) -> () {
     // *** UPDATE *** //  
 
-    if player_state_deserialized.did_accept_level_up {
+    if player_state_deserialized.did_accept_level_up && !player_state_deserialized.did_accept_tier_up {
+        local_state.game_scene = enums::GameScenes::TierUpScene;
+    }
+    else if player_state_deserialized.did_accept_level_up {
         local_state.game_scene = enums::GameScenes::IdleGameScene;
     }
 
@@ -33,17 +36,15 @@ pub fn draw(local_state: &mut LocalState, player_state_deserialized: &states::Pl
         sprite!("level_up", x = 79, y = 20);
     }
 
-    text!(&format!("{}", player_state_deserialized.current_level_in_tier), x = 189, y = 24, color = 0x000000ff);
-
     match player_state_deserialized.items[0].item_type {
         enums::ItemTypes::NoItem => (),
-        enums::ItemTypes::Stapler => sprite!("item_stapler", x = 180, y = 92),
-        enums::ItemTypes::BendedFolder => sprite!("item_bended_folder", x = 181, y = 88),
-        enums::ItemTypes::YogurtCup => sprite!("item_yogurt", x = 183, y = 88),
-        enums::ItemTypes::UsedNapkins => sprite!("item_used_napkin", x = 182, y = 88),
-        enums::ItemTypes::Eggs => sprite!("item_eggs", x = 180, y = 89),
-        enums::ItemTypes::Books => sprite!("item_books", x = 180, y = 82),
-        enums::ItemTypes::Box => sprite!("item_box", x = 180, y = 88),
+        enums::ItemTypes::Stapler => sprite!("item_stapler", x = 180, y = 92, color = player_state_deserialized.items[0].color),
+        enums::ItemTypes::BendedFolder => sprite!("item_bended_folder", x = 181, y = 88, color = player_state_deserialized.items[0].color),
+        enums::ItemTypes::YogurtCup => sprite!("item_yogurt", x = 183, y = 88, color = player_state_deserialized.items[0].color),
+        enums::ItemTypes::UsedNapkins => sprite!("item_used_napkin", x = 182, y = 88, color = player_state_deserialized.items[0].color),
+        enums::ItemTypes::Eggs => sprite!("item_eggs", x = 180, y = 89, color = player_state_deserialized.items[0].color),
+        enums::ItemTypes::Books => sprite!("item_books", x = 180, y = 82, color = player_state_deserialized.items[0].color),
+        enums::ItemTypes::Box => sprite!("item_box", x = 180, y = 88, color = player_state_deserialized.items[0].color),
     }
 
     // need to pick number based on current tier
@@ -137,12 +138,12 @@ pub fn draw(local_state: &mut LocalState, player_state_deserialized: &states::Pl
 }
 
 pub fn input(local_state: &mut LocalState, _player_state_deserialized: &states::PlayerState, _faction_states_deserialized: &(states::FactionState, states::FactionState, states::FactionState), _metastate_deserialized: &states::MetaState) -> () {
-	if gamepad(0).start.just_pressed() {
+	if gamepad(0).start.just_pressed() || mouse(0).left.just_pressed() {
         local_state.egghead_state = true;
         // now i need a transaction to set flag back
         os::client::exec(PROGRAM_ID, "acknowledge_level_up", &[]);
 	}
-    else if gamepad(0).start.just_released() {
+    else if gamepad(0).start.just_released() || mouse(0).left.just_released() {
         local_state.egghead_state = false;
     }
 }
