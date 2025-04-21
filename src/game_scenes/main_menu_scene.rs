@@ -28,7 +28,7 @@ pub fn draw(local_state: &mut LocalState, _player_state_deserialized: &states::P
         sprite!("red_gogo_02", x = 150, y = 148);
     }
 
-    text!("v1.1.1", x = 315, y = 165);
+    text!("v1.1.2", x = 315, y = 165);
 }
 
 pub fn input(local_state: &mut LocalState, _player_state_deserialized: &states::PlayerState, _faction_states_deserialized: &(states::FactionState, states::FactionState, states::FactionState), _metastate_deserialized: &states::MetaState) -> () {
