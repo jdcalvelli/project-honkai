@@ -141,11 +141,13 @@ pub fn draw(local_state: &mut LocalState, player_state_deserialized: &states::Pl
     text!(local_state.item_name.as_str(), x = 83, y = 132, color = 0x000000ff, font = "medium");
 
     if local_state.view_flip {
-        sprite!("red_claim_01", x = 150, y = 148);
+        sprite!("red_claim_01", x = 150, y = 146);
     }
     else {
-        sprite!("red_claim_02", x = 150, y = 148);
+        sprite!("red_claim_02", x = 150, y = 146);
     }
+
+    rect!(x = 150, y = 172, w = (86 / 4) * (local_state.num_presses % 4), h = 1, color = 0xffd700ff);
 
     // item sounds array
     let item_sounds = ["item_shine_01", "item_shine_02", "item_shine_03", "item_shine_04", "item_shine_05"];
@@ -170,7 +172,10 @@ pub fn input(local_state: &mut LocalState, _player_state_deserialized: &states::
         audio::play("button_hit");
         local_state.egghead_state = true;
         // now i need a transaction to set flag back
-        os::client::exec(PROGRAM_ID, "acknowledge_level_up", &[]);
+        local_state.num_presses += 1;
+        if local_state.num_presses == 4 {
+            os::client::exec(PROGRAM_ID, "acknowledge_level_up", &[]);
+        }
 	}
     else if gamepad(0).start.just_released() || mouse(0).left.just_released() {
         audio::play("button_release");

@@ -21,7 +21,8 @@ turbo::init! {
         item_name: String,
         has_broken_level_up: bool,
         has_broken_computer: bool,
-        is_item_sound_selected: bool
+        is_item_sound_selected: bool,
+        num_presses: u32
     } = {
         Self::new()
     }
@@ -39,6 +40,7 @@ impl LocalState {
             has_broken_level_up: false,
             has_broken_computer: false,
             is_item_sound_selected: false,
+            num_presses: 0
         }
     }
 }

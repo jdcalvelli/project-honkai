@@ -25,11 +25,13 @@ pub fn draw(local_state: &mut LocalState, _player_state_deserialized: &states::P
     }
 
     if local_state.view_flip {
-        sprite!("red_gogo_01", x = 150, y = 148);
+        sprite!("red_gogo_01", x = 150, y = 146);
     }
     else {
-        sprite!("red_gogo_02", x = 150, y = 148);
+        sprite!("red_gogo_02", x = 150, y = 146);
     }
+
+    rect!(x = 150, y = 172, w = (86 / 4) * (local_state.num_presses % 4), h = 1, color = 0xffd700ff);
 
     if !audio::is_playing("egg_on_top") {
         audio::play("egg_on_top");
@@ -41,7 +43,10 @@ pub fn input(local_state: &mut LocalState, _player_state_deserialized: &states::
         audio::play("button_hit");
         local_state.egghead_state = true;
         // now i need a transaction to set flag back
-        os::client::exec(PROGRAM_ID, "acknowledge_last_faction_winner", &[]);
+        local_state.num_presses += 1;
+        if local_state.num_presses == 4 {
+            os::client::exec(PROGRAM_ID, "acknowledge_last_faction_winner", &[]);
+        }
     }
     else if gamepad(0).start.just_released() || mouse(0).left.just_released() {
         audio::play("button_release");

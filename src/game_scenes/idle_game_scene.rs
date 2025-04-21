@@ -8,6 +8,7 @@ pub fn update(local_state: &mut LocalState, player_state_deserialized: &states::
 
     local_state.item_name = "".to_string();
     local_state.is_item_sound_selected = false;
+    local_state.num_presses = 0;
 
     // testing
     // log!("{:?}", player_state_deserialized.items);
