@@ -82,7 +82,8 @@ pub fn input(local_state: &mut LocalState, _player_state_deserialized: &states::
 	        local_state.selector_pos += 1;
 	    }
 	}            
-	else if gamepad(0).start.just_pressed() || mouse(0).left.just_pressed() {
+	else if gamepad(0).start.just_pressed() {
+        audio::play("button_hit");
         local_state.egghead_state = true;
         
 	    match local_state.selector_pos {
@@ -97,9 +98,11 @@ pub fn input(local_state: &mut LocalState, _player_state_deserialized: &states::
 	        },
 	        _ => ()
 	    }
+        audio::play("character_select");
 	    local_state.game_scene = enums::GameScenes::IdleGameScene;
 	}
     else if gamepad(0).start.just_released() || mouse(0).left.just_released() {
+        audio::play("button_release");
         local_state.egghead_state = false;
     }
 

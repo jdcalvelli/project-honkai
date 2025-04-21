@@ -28,16 +28,18 @@ pub fn draw(local_state: &mut LocalState, _player_state_deserialized: &states::P
         sprite!("red_gogo_02", x = 150, y = 148);
     }
 
-    text!("v1.1.0", x = 315, y = 165);
+    text!("v1.1.1", x = 315, y = 165);
 }
 
 pub fn input(local_state: &mut LocalState, _player_state_deserialized: &states::PlayerState, _faction_states_deserialized: &(states::FactionState, states::FactionState, states::FactionState), _metastate_deserialized: &states::MetaState) -> () {
 	if gamepad(0).start.just_pressed() || mouse(0).left.just_pressed() {
+        audio::play("button_hit");
         local_state.egghead_state = true;
         // just go to the next scene
         local_state.game_scene = enums::GameScenes::FactionSelectScene;
 	}
     else if gamepad(0).start.just_released() || mouse(0).left.just_released() {
+        audio::play("button_release");
         local_state.egghead_state = false;
     }
 }

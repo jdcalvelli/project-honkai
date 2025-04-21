@@ -45,6 +45,17 @@ pub fn draw(local_state: &mut LocalState, player_state_deserialized: &states::Pl
         enums::ItemTypes::Eggs => sprite!("item_eggs", x = 180, y = 89, color = player_state_deserialized.items[0].color),
         enums::ItemTypes::Books => sprite!("item_books", x = 180, y = 82, color = player_state_deserialized.items[0].color),
         enums::ItemTypes::Box => sprite!("item_box", x = 180, y = 88, color = player_state_deserialized.items[0].color),
+        enums::ItemTypes::Pantaloons => sprite!("item_pantaloons", x = 179, y = 85, color = player_state_deserialized.items[0].color),
+        enums::ItemTypes::PuzzlePiece => sprite!("item_puzzle_piece", x = 181, y = 88, color = player_state_deserialized.items[0].color),
+        enums::ItemTypes::BowlingBall => sprite!("item_bowling_ball", x = 181, y = 85, color = player_state_deserialized.items[0].color),    
+        enums::ItemTypes::GOGOBucks => sprite!("item_go_go_bucks", x = 179, y = 88, color = player_state_deserialized.items[0].color),
+        enums::ItemTypes::CreditCard => sprite!("item_credit_card", x = 182, y = 88, color = player_state_deserialized.items[0].color),
+        enums::ItemTypes::GOGOCard => sprite!("item_go_go_card", x = 182, y = 88, color = player_state_deserialized.items[0].color),
+        enums::ItemTypes::GOGOSticker => sprite!("item_go_go_sticker", x = 176, y = 82, color = player_state_deserialized.items[0].color),
+        enums::ItemTypes::InGameTokens => sprite!("item_in_game_token", x = 185, y = 89, color = player_state_deserialized.items[0].color),
+        enums::ItemTypes::Sock => sprite!("item_sock", x = 183, y = 84, color = player_state_deserialized.items[0].color),
+        enums::ItemTypes::BakedBeans => sprite!("item_baked_beans", x = 182, y = 84, color = player_state_deserialized.items[0].color),
+        enums::ItemTypes::Cube => sprite!("item_cube", x = 181, y = 85, color = player_state_deserialized.items[0].color),
     }
 
     // need to pick number based on current tier
@@ -125,9 +136,9 @@ pub fn draw(local_state: &mut LocalState, player_state_deserialized: &states::Pl
         }
         local_state.item_name.push_str(&player_state_deserialized.items[0].item_type.to_string());
     }
-    log!("{:?}", local_state.item_name);
+    // log!("{:?}", local_state.item_name);
 
-    text!(local_state.item_name.as_str(), x = 83, y = 132, color = 0x000000ff, font = Font::M);
+    text!(local_state.item_name.as_str(), x = 83, y = 132, color = 0x000000ff, font = "medium");
 
     if local_state.view_flip {
         sprite!("red_claim_01", x = 150, y = 148);
@@ -135,15 +146,34 @@ pub fn draw(local_state: &mut LocalState, player_state_deserialized: &states::Pl
     else {
         sprite!("red_claim_02", x = 150, y = 148);
     }
+
+    // item sounds array
+    let item_sounds = ["item_shine_01", "item_shine_02", "item_shine_03", "item_shine_04", "item_shine_05"];
+    let mut item_sound_to_play = "";
+    if !local_state.is_item_sound_selected {
+        let rand_num = rand() as usize % item_sounds.len();
+        item_sound_to_play = item_sounds[rand_num];
+        local_state.is_item_sound_selected = true;
+    }
+
+    if !audio::is_playing(item_sound_to_play) {
+        audio::play(item_sound_to_play);
+    }
+
+    if !audio::is_playing("level_up") {
+        audio::play("level_up");
+    }
 }
 
 pub fn input(local_state: &mut LocalState, _player_state_deserialized: &states::PlayerState, _faction_states_deserialized: &(states::FactionState, states::FactionState, states::FactionState), _metastate_deserialized: &states::MetaState) -> () {
 	if gamepad(0).start.just_pressed() || mouse(0).left.just_pressed() {
+        audio::play("button_hit");
         local_state.egghead_state = true;
         // now i need a transaction to set flag back
         os::client::exec(PROGRAM_ID, "acknowledge_level_up", &[]);
 	}
     else if gamepad(0).start.just_released() || mouse(0).left.just_released() {
+        audio::play("button_release");
         local_state.egghead_state = false;
     }
 }

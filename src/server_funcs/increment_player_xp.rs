@@ -29,7 +29,7 @@ unsafe extern "C" fn on_increment_player_xp() -> usize {
 
 		// need to get a random type from the item_types
 		let mut rand_num: u8 = os::server::random_number();
-		rand_num = rand_num % 8;
+		rand_num = rand_num % 20;
 		let rand_item_type: enums::ItemTypes = unsafe {std::mem::transmute(rand_num)};
 		// generate a random item
 		// STILL NEED TO DO RANDOM COLOR

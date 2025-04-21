@@ -7,18 +7,7 @@ mod server_funcs;
 
 use game_scenes::*;
 
-static PROGRAM_ID: &str = "asdfghjkl";
-
-turbo::cfg! {r#"
-    name = "project-honkai"
-    version = "1.1.0"
-    author = "jd calvelli and devinne moses"
-    description = "a game about modern games"
-    [settings]
-    resolution = [384, 326]
-    [turbo-os]
-    api-url = "https://os.turbo.computer"
-"#}
+static PROGRAM_ID: &str = "ggmvgxdev";
 
 turbo::init! {
     // something only the player will see? menus, interpolated values, etc, local ui state eg, tweens, transitions, etc
@@ -31,7 +20,8 @@ turbo::init! {
         last_event_time: u32,
         item_name: String,
         has_broken_level_up: bool,
-        has_broken_computer: bool
+        has_broken_computer: bool,
+        is_item_sound_selected: bool
     } = {
         Self::new()
     }
@@ -48,6 +38,7 @@ impl LocalState {
             item_name: "".to_string(),
             has_broken_level_up: false,
             has_broken_computer: false,
+            is_item_sound_selected: false,
         }
     }
 }
@@ -98,6 +89,7 @@ turbo::go! ({
     match (local_state.game_scene, utils::deserialize_player(&user_id), utils::deserialize_factions(), utils::deserialize_metastate()) {
         (_, _, _, None) => {
             // create metastate
+            // log!("CREATE METASTATE");
             os::client::exec(PROGRAM_ID, "create_meta_state_data", &[]);
         },
         (_, _, None, _) => {
@@ -149,13 +141,23 @@ turbo::go! ({
         sprite!("outerframe_layer", x = 16, y = 0);
     }
 
+    // play the background music loop only on title screen
+    if local_state.game_scene != enums::GameScenes::MainMenuScene {
+        audio::stop("Title_Screen_Loop");
+    }
+    else if !audio::is_playing("Title_Screen_Loop") {
+        audio::play("Title_Screen_Loop");
+    }
+
     //
     // TESTING AREA
     //
-    // let test_read = os::client::read_file(PROGRAM_ID, "metastate");
-    // if test_read.is_ok() {
-    //     // log!{"{:?}", states::MetaState::try_from_slice(&test_read.clone().unwrap().contents).unwrap().last_faction_win};
-    //     // log!{"{:?}", states::MetaState::try_from_slice(&test_read.clone().unwrap().contents).unwrap().player_list};
+    // let test_read = os::client::watch_file(PROGRAM_ID, "metastate");
+    // if test_read.data.is_some() {
+    //     log!{"{:?}", states::MetaState::try_from_slice(&test_read.data.unwrap().contents).unwrap().player_list};
+    // }
+    // else {
+    //     log!("no data at metastate?");
     // }
 
     local_state.save();

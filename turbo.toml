@@ -1,0 +1,11 @@
+name = "project-honkai"
+version = "1.1.1"
+author = "jd calvelli and devinne moses"
+description = "a game about modern games"
+
+[canvas]
+width = 384
+height = 326
+
+[turbo-os]
+api-url = "https://os.turbo.computer"

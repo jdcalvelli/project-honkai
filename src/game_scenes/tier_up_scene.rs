@@ -17,14 +17,20 @@ pub fn draw(local_state: &mut LocalState, player_state_deserialized: &states::Pl
 
     sprite!("tier_up", x = 88, y = 25);
 
-    sprite!(&format!("ui_tier_{}", player_state_deserialized.current_tier - 1), x = 119, y = 43);
-    sprite!(&format!("ui_tier_{}", player_state_deserialized.current_tier), x = 218, y = 43);
+    let hold = &format!("ui_tier_{}", player_state_deserialized.current_tier - 1);
+    sprite!(hold, x = 119, y = 43);
+    let hold = &format!("ui_tier_{}", player_state_deserialized.current_tier);
+    sprite!(hold, x = 218, y = 43);
 
     if local_state.view_flip {
         sprite!("red_gogo_01", x = 149, y = 144);
     }
     else {
         sprite!("red_gogo_02", x = 149, y = 144);
+    }
+
+    if !audio::is_playing("tier_up") {
+        audio::play("tier_up");
     }
 }
 
