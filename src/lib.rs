@@ -25,6 +25,8 @@ static PROGRAM_ID: &str = "ggmvgxdev3";
 
 #[turbo::game]
 struct LocalState {
+    start_game: bool,
+    user_id: String,
     game_scene: enums::GameScenes,
     view_flip: bool,
     selector_pos: u16,
@@ -40,6 +42,8 @@ struct LocalState {
 impl LocalState {
     pub fn new() -> Self {
         Self {
+            start_game: false,
+            user_id: "".to_string(),
             game_scene: enums::GameScenes::MainMenuScene,
             view_flip: true,
             selector_pos: 0,
@@ -91,200 +95,38 @@ impl LocalState {
 
         // more robust scene management
         // get user id, for use across scenes
-        let user_id = os::client::user_id().unwrap();
+        self.user_id = os::client::user_id().unwrap();
 
-        match (
-            &mut self.game_scene,
-            utils::deserialize_player(&user_id),
-            utils::deserialize_factions(),
-            utils::deserialize_metastate(),
-        ) {
-            (_, _, _, None) => {
-                // create metastate
-                if gamepad::get(0).start.just_pressed() {
-                    log!("CREATE METASTATE");
-                    os::client::command::exec_raw(PROGRAM_ID, "create_meta_state_data", &[]);
-                }
+        match &mut self.game_scene {
+            enums::GameScenes::MainMenuScene => {
+                main_menu_scene::update(self);
+                main_menu_scene::draw(self);
+                main_menu_scene::input(self);
             }
-            (_, _, None, _) => {
-                if gamepad::get(0).start.just_pressed() {
-                    log!("CREATE FACTIONS");
-                    os::client::command::exec_raw(
-                        PROGRAM_ID,
-                        "create_faction_data",
-                        &borsh::to_vec(&enums::Factions::Green).unwrap(),
-                    );
-                    os::client::command::exec_raw(
-                        PROGRAM_ID,
-                        "create_faction_data",
-                        &borsh::to_vec(&enums::Factions::Orange).unwrap(),
-                    );
-                    os::client::command::exec_raw(
-                        PROGRAM_ID,
-                        "create_faction_data",
-                        &borsh::to_vec(&enums::Factions::Purple).unwrap(),
-                    );
-                }
+            enums::GameScenes::FactionSelectScene => {
+                faction_select_scene::update(self);
+                faction_select_scene::draw(self);
+                faction_select_scene::input(self);
             }
-            (_, None, _, _) => {
-                if gamepad::get(0).start.just_pressed() {
-                    log!("CREATE PLAYER");
-                    os::client::command::exec_raw(
-                        PROGRAM_ID,
-                        "create_player_data",
-                        &borsh::to_vec(&enums::Factions::NoFaction).unwrap(),
-                    );
-                }
+                enums::GameScenes::IdleGameScene => {
+                idle_game_scene::update(self);
+                idle_game_scene::draw(self);
+                idle_game_scene::input(self);
             }
-            (
-                enums::GameScenes::MainMenuScene,
-                Some(player_state_deserialized),
-                Some(faction_states_deserialized),
-                Some(metastate_deserialized),
-            ) => {
-                main_menu_scene::update(
-                    self,
-                    &player_state_deserialized,
-                    &faction_states_deserialized,
-                    &metastate_deserialized,
-                );
-                main_menu_scene::draw(
-                    self,
-                    &player_state_deserialized,
-                    &faction_states_deserialized,
-                    &metastate_deserialized,
-                );
-                main_menu_scene::input(
-                    self,
-                    &player_state_deserialized,
-                    &faction_states_deserialized,
-                    &metastate_deserialized,
-                );
+            enums::GameScenes::TierUpScene => {
+                tier_up_scene::update(self);
+                tier_up_scene::draw(self);
+                tier_up_scene::input(self);
             }
-            (
-                enums::GameScenes::FactionSelectScene,
-                Some(player_state_deserialized),
-                Some(faction_states_deserialized),
-                Some(metastate_deserialized),
-            ) => {
-                faction_select_scene::update(
-                    self,
-                    &player_state_deserialized,
-                    &faction_states_deserialized,
-                    &metastate_deserialized,
-                );
-                faction_select_scene::draw(
-                    self,
-                    &player_state_deserialized,
-                    &faction_states_deserialized,
-                    &metastate_deserialized,
-                );
-                faction_select_scene::input(
-                    self,
-                    &player_state_deserialized,
-                    &faction_states_deserialized,
-                    &metastate_deserialized,
-                );
+            enums::GameScenes::LevelUpScene => {
+                level_up_scene::update(self);
+                level_up_scene::draw(self);
+                level_up_scene::input(self);
             }
-            (
-                enums::GameScenes::IdleGameScene,
-                Some(player_state_deserialized),
-                Some(faction_states_deserialized),
-                Some(metastate_deserialized),
-            ) => {
-                idle_game_scene::update(
-                    self,
-                    &player_state_deserialized,
-                    &faction_states_deserialized,
-                    &metastate_deserialized,
-                );
-                idle_game_scene::draw(
-                    self,
-                    &player_state_deserialized,
-                    &faction_states_deserialized,
-                    &metastate_deserialized,
-                );
-                idle_game_scene::input(
-                    self,
-                    &player_state_deserialized,
-                    &faction_states_deserialized,
-                    &metastate_deserialized,
-                );
-            }
-            (
-                enums::GameScenes::TierUpScene,
-                Some(player_state_deserialized),
-                Some(faction_states_deserialized),
-                Some(metastate_deserialized),
-            ) => {
-                tier_up_scene::update(
-                    self,
-                    &player_state_deserialized,
-                    &faction_states_deserialized,
-                    &metastate_deserialized,
-                );
-                tier_up_scene::draw(
-                    self,
-                    &player_state_deserialized,
-                    &faction_states_deserialized,
-                    &metastate_deserialized,
-                );
-                tier_up_scene::input(
-                    self,
-                    &player_state_deserialized,
-                    &faction_states_deserialized,
-                    &metastate_deserialized,
-                );
-            }
-            (
-                enums::GameScenes::LevelUpScene,
-                Some(player_state_deserialized),
-                Some(faction_states_deserialized),
-                Some(metastate_deserialized),
-            ) => {
-                level_up_scene::update(
-                    self,
-                    &player_state_deserialized,
-                    &faction_states_deserialized,
-                    &metastate_deserialized,
-                );
-                level_up_scene::draw(
-                    self,
-                    &player_state_deserialized,
-                    &faction_states_deserialized,
-                    &metastate_deserialized,
-                );
-                level_up_scene::input(
-                    self,
-                    &player_state_deserialized,
-                    &faction_states_deserialized,
-                    &metastate_deserialized,
-                );
-            }
-            (
-                enums::GameScenes::LastFactionWinScene,
-                Some(player_state_deserialized),
-                Some(faction_states_deserialized),
-                Some(metastate_deserialized),
-            ) => {
-                last_faction_win_scene::update(
-                    self,
-                    &player_state_deserialized,
-                    &faction_states_deserialized,
-                    &metastate_deserialized,
-                );
-                last_faction_win_scene::draw(
-                    self,
-                    &player_state_deserialized,
-                    &faction_states_deserialized,
-                    &metastate_deserialized,
-                );
-                last_faction_win_scene::input(
-                    self,
-                    &player_state_deserialized,
-                    &faction_states_deserialized,
-                    &metastate_deserialized,
-                );
+            enums::GameScenes::LastFactionWinScene => {
+                last_faction_win_scene::update(self);
+                last_faction_win_scene::draw(self);
+                last_faction_win_scene::input(self);
             }
         }
 
@@ -295,20 +137,10 @@ impl LocalState {
         }
 
         // play the background music loop only on title screen
-        // if self.game_scene != enums::GameScenes::MainMenuScene {
-        //     audio::stop("Title_Screen_Loop");
-        // } else if !audio::is_playing("Title_Screen_Loop") {
-        //     audio::play("Title_Screen_Loop");
-        // }
-
-        //
-        // TESTING AREA
-        //
-        // let test_read = os::client::fs::watch(format!("{}/metastate", PROGRAM_ID));
-        // if test_read.data.is_some() {
-        //     log! {"{:?}", states::MetaState::try_from_slice(&test_read.data.unwrap().contents).unwrap().player_list};
-        // } else {
-        //     log!("no data at metastate?");
-        // }
+        if self.game_scene != enums::GameScenes::MainMenuScene {
+            audio::stop("Title_Screen_Loop");
+        } else if !audio::is_playing("Title_Screen_Loop") {
+            audio::play("Title_Screen_Loop");
+        }
     }
 }

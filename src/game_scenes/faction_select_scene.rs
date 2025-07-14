@@ -1,18 +1,22 @@
 use crate::*;
 
-pub fn update(local_state: &mut LocalState, player_state_deserialized: &states::PlayerState, _faction_states_deserialized: &(states::FactionState, states::FactionState, states::FactionState), _metastate_deserialized: &states::MetaState) -> () {
-	// *** UPDATE *** //
+pub fn update(local_state: &mut LocalState) -> () {
+    if utils::deserialize_player(&local_state.user_id).is_some() {
+        // *** UPDATE *** //
 
-    if player_state_deserialized.faction != enums::Factions::NoFaction {
-        local_state.game_scene = enums::GameScenes::IdleGameScene;
-    }
+        let player_state_deserialized = utils::deserialize_player(&local_state.user_id).unwrap();
 
-    if time::tick() % 16 == 0 {
-        local_state.view_flip = !local_state.view_flip;
+        if player_state_deserialized.faction != enums::Factions::NoFaction {
+            local_state.game_scene = enums::GameScenes::IdleGameScene;
+        }
+
+        if time::tick() % 16 == 0 {
+            local_state.view_flip = !local_state.view_flip;
+        }
     }
 }
 
-pub fn draw(local_state: &mut LocalState, _player_state_deserialized: &states::PlayerState, _faction_states_deserialized: &(states::FactionState, states::FactionState, states::FactionState), _metastate_deserialized: &states::MetaState) -> () {
+pub fn draw(local_state: &mut LocalState) -> () {
     // *** DRAW *** //
 
     sprite!("txt_select_your_suit", x = 62, y = 23);
@@ -65,7 +69,7 @@ pub fn draw(local_state: &mut LocalState, _player_state_deserialized: &states::P
     }
 }
 
-pub fn input(local_state: &mut LocalState, _player_state_deserialized: &states::PlayerState, _faction_states_deserialized: &(states::FactionState, states::FactionState, states::FactionState), _metastate_deserialized: &states::MetaState) -> () {
+pub fn input(local_state: &mut LocalState) -> () {
 	// *** INPUT *** //
 
 	if gamepad::get(0).left.just_pressed() {

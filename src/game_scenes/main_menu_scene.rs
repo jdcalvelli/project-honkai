@@ -2,15 +2,24 @@ use crate::*;
 
 // ADD A CHECK FOR PLAYER ACKNOWLEDGE LAST WINNER
 
-pub fn update(local_state: &mut LocalState, _player_state_deserialized: &states::PlayerState, _faction_states_deserialized: &(states::FactionState, states::FactionState, states::FactionState), _metastate_deserialized: &states::MetaState) -> () {
+pub fn update(local_state: &mut LocalState) -> () {
     // *** UPDATE *** //  
 
     if time::tick() % 16 == 0 {
         local_state.view_flip = !local_state.view_flip;
     }
+
+    // delay until all things are in, and we click play once
+    if utils::deserialize_metastate().is_some() 
+        && utils::deserialize_factions().is_some() 
+        && utils::deserialize_player(&local_state.user_id).is_some() 
+        && local_state.start_game {
+        // go to the next scene
+        local_state.game_scene = enums::GameScenes::FactionSelectScene;
+    }
 }
 
-pub fn draw(local_state: &mut LocalState, _player_state_deserialized: &states::PlayerState, _faction_states_deserialized: &(states::FactionState, states::FactionState, states::FactionState), _metastate_deserialized: &states::MetaState) -> () {
+pub fn draw(local_state: &mut LocalState) -> () {
     // *** DRAW *** //
 
     sprite!("gofirst", x = 71, y = 21);
@@ -28,16 +37,40 @@ pub fn draw(local_state: &mut LocalState, _player_state_deserialized: &states::P
         sprite!("red_gogo_02", x = 150, y = 148);
     }
 
-    text!("v2.0.0", x = 315, y = 165);
+    text!("v2.0.1", x = 315, y = 165);
 }
 
-pub fn input(local_state: &mut LocalState, _player_state_deserialized: &states::PlayerState, _faction_states_deserialized: &(states::FactionState, states::FactionState, states::FactionState), _metastate_deserialized: &states::MetaState) -> () {
-	if gamepad::get(0).start.just_pressed() || mouse::screen().left.just_pressed() {
+pub fn input(local_state: &mut LocalState) -> () {
+    if gamepad::get(0).start.just_pressed()|| mouse::screen().left.just_pressed() {
         audio::play("button_hit");
         local_state.egghead_state = true;
-        // just go to the next scene
-        local_state.game_scene = enums::GameScenes::FactionSelectScene;
-	}
+        // create metastate
+        log!("CREATE METASTATE");
+        os::client::command::exec_raw(PROGRAM_ID, "create_meta_state_data", &[]);
+        log!("CREATE FACTIONS");
+        os::client::command::exec_raw(
+            PROGRAM_ID,
+            "create_faction_data",
+            &borsh::to_vec(&enums::Factions::Green).unwrap(),
+        );
+        os::client::command::exec_raw(
+            PROGRAM_ID,
+            "create_faction_data",
+            &borsh::to_vec(&enums::Factions::Orange).unwrap(),
+        );
+        os::client::command::exec_raw(
+            PROGRAM_ID,
+            "create_faction_data",
+            &borsh::to_vec(&enums::Factions::Purple).unwrap(),
+        );
+        log!("CREATE PLAYER");
+        os::client::command::exec_raw(
+            PROGRAM_ID,
+            "create_player_data",
+            &borsh::to_vec(&enums::Factions::NoFaction).unwrap(),
+        );
+        local_state.start_game = true;
+    }
     else if gamepad::get(0).start.just_released() || mouse::screen().left.just_released() {
         audio::play("button_release");
         local_state.egghead_state = false;
