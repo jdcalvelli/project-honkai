@@ -1,6 +1,6 @@
 use crate::*;
 
-#[derive(Debug, Clone, PartialEq, BorshDeserialize, BorshSerialize)]
+#[turbo::serialize]
 pub struct MetaState {
 	pub last_faction_win: enums::Factions,
 	pub orange_total_wins: u32,

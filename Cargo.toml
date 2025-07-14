@@ -1,13 +1,16 @@
 [package]
 name = "project-honkai"
-version = "1.1.1"
+version = "2.0.0"
 edition = "2021"
 
 [dependencies]
-turbo = { version = ">=2.0.0", package = "turbo-genesis-sdk" }
+turbo = { version = "4.0.0-alpha.24", package = "turbo-genesis-sdk" }
 
 [lib]
 crate-type = ["cdylib"]
 
 [lints.rust]
 unexpected_cfgs = { level = "allow", check-cfg = ['cfg(no_run)'] }
+
+[package.metadata.turbo]
+user = "ed8ac764-ff3f-40fd-b4b8-9191e590432a"

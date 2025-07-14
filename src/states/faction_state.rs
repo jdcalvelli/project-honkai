@@ -1,6 +1,6 @@
 use crate::*;
 
-#[derive(Debug, Clone, PartialEq, BorshDeserialize, BorshSerialize)]
+#[turbo::serialize]
 pub struct FactionState {
 	pub current_level: u64,
 	pub max_level: u64,

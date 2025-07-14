@@ -1,6 +1,7 @@
 use crate::*;
 
-#[derive(BorshSerialize, BorshDeserialize, PartialEq, Debug, Clone, Copy)]
+#[turbo::serialize]
+#[derive(PartialEq, Copy)]
 pub enum Factions {
 	Green,
 	Orange,

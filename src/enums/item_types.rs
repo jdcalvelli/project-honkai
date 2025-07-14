@@ -1,6 +1,6 @@
 use crate::*;
 
-#[derive(Debug, Clone, PartialEq, BorshDeserialize, BorshSerialize)]
+#[turbo::serialize]
 pub enum ItemTypes {
 	NoItem,
     Stapler,

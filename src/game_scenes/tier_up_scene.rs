@@ -7,7 +7,7 @@ pub fn update(local_state: &mut LocalState, player_state_deserialized: &states::
         local_state.game_scene = enums::GameScenes::IdleGameScene;
     }
 
-    if tick() % 16 == 0 {
+    if time::tick() % 16 == 0 {
         local_state.view_flip = !local_state.view_flip;
     }
 }
@@ -37,16 +37,16 @@ pub fn draw(local_state: &mut LocalState, player_state_deserialized: &states::Pl
 }
 
 pub fn input(local_state: &mut LocalState, _player_state_deserialized: &states::PlayerState, _faction_states_deserialized: &(states::FactionState, states::FactionState, states::FactionState), _metastate_deserialized: &states::MetaState) -> () {
-	if gamepad(0).start.just_pressed() || mouse(0).left.just_pressed() {
+	if gamepad::get(0).start.just_pressed() || mouse::screen().left.just_pressed() {
         audio::play("button_hit");
         local_state.egghead_state = true;
         local_state.num_presses += 1;
         // now i need a transaction to set flag back
         if local_state.num_presses == 8 {
-            os::client::exec(PROGRAM_ID, "acknowledge_tier_up", &[]);
+            os::client::command::exec_raw(PROGRAM_ID, "acknowledge_tier_up", &[]);
         }
 	}
-    else if gamepad(0).start.just_released() || mouse(0).left.just_released() {
+    else if gamepad::get(0).start.just_released() || mouse::screen().left.just_released() {
         audio::play("button_release");
         local_state.egghead_state = false;
     }

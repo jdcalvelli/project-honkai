@@ -10,7 +10,7 @@ pub fn update(local_state: &mut LocalState, player_state_deserialized: &states::
         local_state.game_scene = enums::GameScenes::IdleGameScene;
     }
 
-    if tick() % 16 == 0 {
+    if time::tick() % 16 == 0 {
         local_state.view_flip = !local_state.view_flip;
     }
 }
@@ -65,70 +65,70 @@ pub fn draw(local_state: &mut LocalState, player_state_deserialized: &states::Pl
         match player_state_deserialized.current_tier {
             0 => {
                 for _ in 0..player_state_deserialized.current_tier + 1 {
-                    let rand_num = rand() % t1_names.len() as u32;
+                    let rand_num = random::u32() % t1_names.len() as u32;
                     local_state.item_name.push_str(t1_names[rand_num as usize]);
                     local_state.item_name.push_str(" ");
                 }
             },
             1 => {
                 for _ in 0..player_state_deserialized.current_tier + 1 {
-                    let rand_num = rand() % t2_names.len() as u32;
+                    let rand_num = random::u32() % t2_names.len() as u32;
                     local_state.item_name.push_str(t2_names[rand_num as usize]);
                     local_state.item_name.push_str(" ");
                 }
             },
             2 => {
                 for _ in 0..player_state_deserialized.current_tier + 1 {
-                    let rand_num = rand() % t3_names.len() as u32;
+                    let rand_num = random::u32() % t3_names.len() as u32;
                     local_state.item_name.push_str(t3_names[rand_num as usize]);
                     local_state.item_name.push_str(" ");
                 }
             },
             3 => {
                 for _ in 0..player_state_deserialized.current_tier + 1 {
-                    let rand_num = rand() % t4_names.len() as u32;
+                    let rand_num = random::u32() % t4_names.len() as u32;
                     local_state.item_name.push_str(t4_names[rand_num as usize]);
                     local_state.item_name.push_str(" ");
                 }
             },
             4 => {
                 for _ in 0..player_state_deserialized.current_tier + 1 {
-                    let rand_num = rand() % t5_names.len() as u32;
+                    let rand_num = random::u32() % t5_names.len() as u32;
                     local_state.item_name.push_str(t5_names[rand_num as usize]);
                     local_state.item_name.push_str(" ");
                 }
             },
             5 => {
                 for _ in 0..player_state_deserialized.current_tier + 1 {
-                    let rand_num = rand() % t6_names.len() as u32;
+                    let rand_num = random::u32() % t6_names.len() as u32;
                     local_state.item_name.push_str(t6_names[rand_num as usize]);
                     local_state.item_name.push_str(" ");
                 }
             },
             6 => {
                 for _ in 0..player_state_deserialized.current_tier + 1 {
-                    let rand_num = rand() % t7_names.len() as u32;
+                    let rand_num = random::u32() % t7_names.len() as u32;
                     local_state.item_name.push_str(t7_names[rand_num as usize]);
                     local_state.item_name.push_str(" ");
                 }
             },
             7 => {
                 for _ in 0..player_state_deserialized.current_tier + 1 {
-                    let rand_num = rand() % t8_names.len() as u32;
+                    let rand_num = random::u32() % t8_names.len() as u32;
                     local_state.item_name.push_str(t8_names[rand_num as usize]);
                     local_state.item_name.push_str(" ");
                 }
             },
             8 => {
                 for _ in 0..player_state_deserialized.current_tier + 1 {
-                    let rand_num = rand() % t9_names.len() as u32;
+                    let rand_num = random::u32() % t9_names.len() as u32;
                     local_state.item_name.push_str(t9_names[rand_num as usize]);
                     local_state.item_name.push_str(" ");
                 }
             },
             _ => {
                 for _ in 0..player_state_deserialized.current_tier + 1 {
-                    let rand_num = rand() % t10_names.len() as u32;
+                    let rand_num = random::u32() % t10_names.len() as u32;
                     local_state.item_name.push_str(t10_names[rand_num as usize]);
                     local_state.item_name.push_str(" ");
                 }
@@ -153,7 +153,7 @@ pub fn draw(local_state: &mut LocalState, player_state_deserialized: &states::Pl
     let item_sounds = ["item_shine_01", "item_shine_02", "item_shine_03", "item_shine_04", "item_shine_05"];
     let mut item_sound_to_play = "";
     if !local_state.is_item_sound_selected {
-        let rand_num = rand() as usize % item_sounds.len();
+        let rand_num = random::u32() as usize % item_sounds.len();
         item_sound_to_play = item_sounds[rand_num];
         local_state.is_item_sound_selected = true;
     }
@@ -168,16 +168,16 @@ pub fn draw(local_state: &mut LocalState, player_state_deserialized: &states::Pl
 }
 
 pub fn input(local_state: &mut LocalState, _player_state_deserialized: &states::PlayerState, _faction_states_deserialized: &(states::FactionState, states::FactionState, states::FactionState), _metastate_deserialized: &states::MetaState) -> () {
-	if gamepad(0).start.just_pressed() || mouse(0).left.just_pressed() {
+	if gamepad::get(0).start.just_pressed() || mouse::screen().left.just_pressed() {
         audio::play("button_hit");
         local_state.egghead_state = true;
         // now i need a transaction to set flag back
         local_state.num_presses += 1;
         if local_state.num_presses == 4 {
-            os::client::exec(PROGRAM_ID, "acknowledge_level_up", &[]);
+            os::client::command::exec_raw(PROGRAM_ID, "acknowledge_level_up", &[]);
         }
 	}
-    else if gamepad(0).start.just_released() || mouse(0).left.just_released() {
+    else if gamepad::get(0).start.just_released() || mouse::screen().left.just_released() {
         audio::play("button_release");
         local_state.egghead_state = false;
     }

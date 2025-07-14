@@ -1,27 +1,27 @@
 use crate::*;
 
-#[export_name = "turbo/acknowledge_last_faction_winner"]
+#[export_name = "turbo_program:command_handler/ggmvgxdev3/acknowledge_last_faction_winner"]
 unsafe extern "C" fn on_acknowledge_last_faction_winner() -> usize {
     // get the user id
-    let user_id = os::server::get_user_id();
+    let user_id = os::server::command::user_id();
 
     // try to read player state data from file, which returns Result
-    let read_result = os::server::read_file(&format!("players/{user_id}"));
+    let read_result = os::server::fs::read_bytes(&format!("players/{user_id}"));
     if read_result.is_err() {
         // no read data?
-        return os::server::CANCEL
+        return os::server::command::CANCEL
     }
     
     let mut current_player_deserialized = states::PlayerState::try_from_slice(&read_result.unwrap()).unwrap();
     current_player_deserialized.did_accept_last_faction_winner = true;
     
     // try write
-    let write_result = os::server::write_file(&format!("players/{user_id}"), 
-        &current_player_deserialized.try_to_vec().unwrap());
+    let write_result = os::server::fs::write_bytes(&format!("players/{user_id}"), 
+        &borsh::to_vec(&current_player_deserialized).unwrap());
     if write_result.is_err() {
         // write error
-        return os::server::CANCEL
+        return os::server::command::CANCEL
     }
     
-    os::server::COMMIT
+    os::server::command::COMMIT
 }

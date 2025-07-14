@@ -22,10 +22,10 @@ pub fn draw(local_state: &mut LocalState, player_state_deserialized: &states::Pl
     sprite!("ui_faction_bar", x = 38, y = 21);
     sprite!("ui_xp_bar", x = 39, y = 65);
     // light sprite moving
-    sprite!("lights_overlay", x = {98 + (tick() % 36 / 4) * 24}, y = 63);
+    sprite!("lights_overlay", x = {98 + (time::tick() % 36 / 4) * 24}, y = 63);
 
     // draw correct button based on winning faction
-    let t = (tick() / 8) as f32;
+    let t = (time::tick() / 8) as f32;
     let s = 2. * t.sin();
     match metastate_deserialized.last_faction_win {
         enums::Factions::Green => sprite!("green_badge", x = 326, y = 29, rotation = 5. * s),
@@ -250,7 +250,7 @@ pub fn draw(local_state: &mut LocalState, player_state_deserialized: &states::Pl
     // pedestal
     sprite!("platform_layer", x = 50, y = 150);
     // NOW THE ITEM SPRITE!
-    let t = (tick() / 8) as f32;
+    let t = (time::tick() / 8) as f32;
     let s = 2. * t.sin();
     if player_state_deserialized.did_accept_level_up {
         match player_state_deserialized.items[0].item_type {
@@ -345,18 +345,18 @@ pub fn draw(local_state: &mut LocalState, player_state_deserialized: &states::Pl
 pub fn input(local_state: &mut LocalState, player_state_deserialized: &states::PlayerState, _faction_states_deserialized: &(states::FactionState, states::FactionState, states::FactionState), _metastate_deserialized: &states::MetaState) -> () {
     // *** INPUT *** //
 
-    if gamepad(0).start.just_pressed() {
+    if gamepad::get(0).start.just_pressed() {
         audio::play("button_hit");
         local_state.egghead_state = true;
         if player_state_deserialized.current_xp == player_state_deserialized.xp_needed_for_next_level - 1 {
-            os::client::exec(PROGRAM_ID, "increment_player_xp", &[]);
-            os::client::exec(PROGRAM_ID, "increment_faction_level", &borsh::to_vec(&player_state_deserialized.faction).unwrap());
+            os::client::command::exec_raw(PROGRAM_ID, "increment_player_xp", &[]);
+            os::client::command::exec_raw(PROGRAM_ID, "increment_faction_level", &borsh::to_vec(&player_state_deserialized.faction).unwrap());
         }
         else {
-            os::client::exec(PROGRAM_ID, "increment_player_xp", &[]);
+            os::client::command::exec_raw(PROGRAM_ID, "increment_player_xp", &[]);
         }
     }
-    else if gamepad(0).start.just_released() || mouse(0).left.just_released() {
+    else if gamepad::get(0).start.just_released() || mouse::screen().left.just_released() {
         audio::play("button_release");
         local_state.egghead_state = false;
     }

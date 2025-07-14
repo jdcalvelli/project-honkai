@@ -1,6 +1,6 @@
 use crate::*;
 
-#[derive(Debug, Clone, PartialEq, BorshDeserialize, BorshSerialize)]
+#[turbo::serialize]
 pub struct Item {
 	pub item_type: enums::ItemTypes,
 	pub color: u32

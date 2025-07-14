@@ -1,6 +1,6 @@
 use crate::*;
 
-#[derive(Debug, Clone, PartialEq, BorshDeserialize, BorshSerialize)]
+#[turbo::serialize]
 pub struct PlayerState {
 	pub faction: enums::Factions,
 	pub items: Vec<structs::Item>,

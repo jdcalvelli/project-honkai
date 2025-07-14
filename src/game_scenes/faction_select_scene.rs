@@ -7,7 +7,7 @@ pub fn update(local_state: &mut LocalState, player_state_deserialized: &states::
         local_state.game_scene = enums::GameScenes::IdleGameScene;
     }
 
-    if tick() % 16 == 0 {
+    if time::tick() % 16 == 0 {
         local_state.view_flip = !local_state.view_flip;
     }
 }
@@ -68,40 +68,40 @@ pub fn draw(local_state: &mut LocalState, _player_state_deserialized: &states::P
 pub fn input(local_state: &mut LocalState, _player_state_deserialized: &states::PlayerState, _faction_states_deserialized: &(states::FactionState, states::FactionState, states::FactionState), _metastate_deserialized: &states::MetaState) -> () {
 	// *** INPUT *** //
 
-	if gamepad(0).left.just_pressed() {
+	if gamepad::get(0).left.just_pressed() {
 	  // move selector left
 	    if local_state.selector_pos != 0
 	    {
 	        local_state.selector_pos -= 1;
 	    }
 	}
-	else if gamepad(0).right.just_pressed() {
+	else if gamepad::get(0).right.just_pressed() {
 	    // move selector right
 	    if local_state.selector_pos != 2
 	    {
 	        local_state.selector_pos += 1;
 	    }
 	}            
-	else if gamepad(0).start.just_pressed() {
+	else if gamepad::get(0).start.just_pressed() {
         audio::play("button_hit");
         local_state.egghead_state = true;
         
 	    match local_state.selector_pos {
 	        0 => {
-	            os::client::exec(PROGRAM_ID, "update_player_faction", &borsh::to_vec(&enums::Factions::Orange).unwrap());
+	            os::client::command::exec_raw(PROGRAM_ID, "update_player_faction", &borsh::to_vec(&enums::Factions::Orange).unwrap());
 	        },
 	        1 => {
-	            os::client::exec(PROGRAM_ID, "update_player_faction", &borsh::to_vec(&enums::Factions::Green).unwrap());
+	            os::client::command::exec_raw(PROGRAM_ID, "update_player_faction", &borsh::to_vec(&enums::Factions::Green).unwrap());
 	        },
 	        2 => {
-	            os::client::exec(PROGRAM_ID, "update_player_faction", &borsh::to_vec(&enums::Factions::Purple).unwrap());
+	            os::client::command::exec_raw(PROGRAM_ID, "update_player_faction", &borsh::to_vec(&enums::Factions::Purple).unwrap());
 	        },
 	        _ => ()
 	    }
         audio::play("character_select");
 	    local_state.game_scene = enums::GameScenes::IdleGameScene;
 	}
-    else if gamepad(0).start.just_released() || mouse(0).left.just_released() {
+    else if gamepad::get(0).start.just_released() || mouse::screen().left.just_released() {
         audio::play("button_release");
         local_state.egghead_state = false;
     }

@@ -1,6 +1,7 @@
 use crate::*;
 
-#[derive(BorshSerialize, BorshDeserialize, PartialEq, Debug, Clone, Copy)]
+#[turbo::serialize]
+#[derive(PartialEq)]
 pub enum GameScenes {
 	MainMenuScene,
 	FactionSelectScene,
