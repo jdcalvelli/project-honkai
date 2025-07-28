@@ -1,6 +1,6 @@
 //
 
-const METADATA_BYTES: &[u8; 425] = b"{\"name\":\"project honkai\",\"program_id\":\"ggmvgxdev3\",\"owner_id\":\"ed8ac764-ff3f-40fd-b4b8-9191e590432a\",\"commands\":[{\"name\":\"acknowledge_last_faction_win\"},{\"name\":\"acknowledge_level_up\"},{\"name\":\"acknowledge_tier_up\"},{\"name\":\"create_faction_data\"},{\"name\":\"create_meta_state_data\"},{\"name\":\"create_player_data\"},{\"name\":\"increment_faction_level\"},{\"name\":\"increment_player_xp\"},{\"name\":\"update_player_faction\"}],\"channels\":[]}";
+const METADATA_BYTES: &[u8; 425] = b"{\"name\":\"project honkai\",\"program_id\":\"ggmvgxdev4\",\"owner_id\":\"ed8ac764-ff3f-40fd-b4b8-9191e590432a\",\"commands\":[{\"name\":\"acknowledge_last_faction_win\"},{\"name\":\"acknowledge_level_up\"},{\"name\":\"acknowledge_tier_up\"},{\"name\":\"create_faction_data\"},{\"name\":\"create_meta_state_data\"},{\"name\":\"create_player_data\"},{\"name\":\"increment_faction_level\"},{\"name\":\"increment_player_xp\"},{\"name\":\"update_player_faction\"}],\"channels\":[]}";
 
 #[used]
 #[allow(non_upper_case_globals)]
@@ -9,8 +9,8 @@ pub static TURBO_METADATA: [u8; 425] = *METADATA_BYTES;
 
 //
 
-use turbo::*;
 use borsh::BorshDeserialize;
+use turbo::*;
 
 mod enums;
 mod game_scenes;
@@ -21,7 +21,7 @@ mod utils;
 
 use game_scenes::*;
 
-static PROGRAM_ID: &str = "ggmvgxdev3";
+static PROGRAM_ID: &str = "ggmvgxdev4";
 
 #[turbo::game]
 struct LocalState {
@@ -108,7 +108,7 @@ impl LocalState {
                 faction_select_scene::draw(self);
                 faction_select_scene::input(self);
             }
-                enums::GameScenes::IdleGameScene => {
+            enums::GameScenes::IdleGameScene => {
                 idle_game_scene::update(self);
                 idle_game_scene::draw(self);
                 idle_game_scene::input(self);

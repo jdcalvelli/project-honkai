@@ -1,10 +1,8 @@
-use crate::*;
-
 #[turbo::serialize]
 #[derive(PartialEq, Copy)]
 pub enum Factions {
-	Green,
-	Orange,
-	Purple,
-	NoFaction
+    Green,
+    Orange,
+    Purple,
+    NoFaction,
 }

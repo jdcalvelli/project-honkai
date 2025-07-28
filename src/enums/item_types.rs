@@ -1,8 +1,6 @@
-use crate::*;
-
 #[turbo::serialize]
 pub enum ItemTypes {
-	NoItem,
+    NoItem,
     Stapler,
     BendedFolder,
     YogurtCup,
@@ -20,7 +18,7 @@ pub enum ItemTypes {
     InGameTokens,
     Sock,
     BakedBeans,
-    Cube
+    Cube,
 }
 
 impl ItemTypes {
@@ -44,7 +42,7 @@ impl ItemTypes {
             Self::InGameTokens => "In-Game Tokens".to_string(),
             Self::Sock => "Sock".to_string(),
             Self::BakedBeans => "Baked Beans".to_string(),
-            Self::Cube => "Cube".to_string()
+            Self::Cube => "Cube".to_string(),
         }
     }
 }
