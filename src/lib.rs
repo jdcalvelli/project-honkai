@@ -46,7 +46,7 @@ impl LocalState {
             user_id: "".to_string(),
             game_scene: enums::GameScenes::MainMenuScene,
             view_flip: true,
-            selector_pos: 0,
+            selector_pos: 1,
             egghead_state: false,
             last_event_time: 0,
             item_name: "".to_string(),

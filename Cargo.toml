@@ -1,10 +1,10 @@
 [package]
 name = "project-honkai"
-version = "2.0.1"
+version = "2.2.1"
 edition = "2021"
 
 [dependencies]
-turbo = { version = "4.0.0-alpha.24", package = "turbo-genesis-sdk" }
+turbo = { version = "4.0.0", package = "turbo-genesis-sdk" }
 
 [lib]
 crate-type = ["cdylib"]

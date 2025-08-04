@@ -49,7 +49,7 @@ pub fn draw(local_state: &mut LocalState) -> () {
 }
 
 pub fn input(local_state: &mut LocalState) -> () {
-    if gamepad::get(0).start.just_pressed() {
+    if pointer::screen().just_pressed() || gamepad::get(0).start.just_pressed() {
         audio::play("button_hit");
         local_state.egghead_state = true;
         // now i need a transaction to set flag back
@@ -58,7 +58,7 @@ pub fn input(local_state: &mut LocalState) -> () {
         } else {
             local_state.num_presses += 1;
         }
-    } else if gamepad::get(0).start.just_released() {
+    } else if pointer::screen().just_released() || gamepad::get(0).start.just_released() {
         audio::play("button_release");
         local_state.egghead_state = false;
     }

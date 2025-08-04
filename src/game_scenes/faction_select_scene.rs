@@ -112,4 +112,56 @@ pub fn input(local_state: &mut LocalState) -> () {
         audio::play("button_release");
         local_state.egghead_state = false;
     }
+
+    // different handling for pointer
+
+    let orange_bounds = bounds::new(85, 108).translate(47, 51);
+    let green_bounds = bounds::new(85, 108).translate(149, 51);
+    let purple_bounds = bounds::new(85, 108).translate(251, 51);
+
+    // hovers for selector position
+
+    if pointer::screen().intersects_bounds(orange_bounds) {
+        local_state.selector_pos = 0;
+    } else if pointer::screen().intersects_bounds(green_bounds) {
+        local_state.selector_pos = 1;
+    } else if pointer::screen().intersects_bounds(purple_bounds) {
+        local_state.selector_pos = 2;
+    }
+
+    // actual selection logic
+    if pointer::screen().just_pressed_bounds(orange_bounds) {
+        audio::play("button_hit");
+        local_state.egghead_state = true;
+        os::client::command::exec_raw(
+            PROGRAM_ID,
+            "update_player_faction",
+            &borsh::to_vec(&enums::Factions::Orange).unwrap(),
+        );
+        audio::play("character_select");
+        local_state.game_scene = enums::GameScenes::IdleGameScene;
+    } else if pointer::screen().just_pressed_bounds(green_bounds) {
+        audio::play("button_hit");
+        local_state.egghead_state = true;
+        os::client::command::exec_raw(
+            PROGRAM_ID,
+            "update_player_faction",
+            &borsh::to_vec(&enums::Factions::Green).unwrap(),
+        );
+        audio::play("character_select");
+        local_state.game_scene = enums::GameScenes::IdleGameScene;
+    } else if pointer::screen().just_pressed_bounds(purple_bounds) {
+        audio::play("button_hit");
+        local_state.egghead_state = true;
+        os::client::command::exec_raw(
+            PROGRAM_ID,
+            "update_player_faction",
+            &borsh::to_vec(&enums::Factions::Purple).unwrap(),
+        );
+        audio::play("character_select");
+        local_state.game_scene = enums::GameScenes::IdleGameScene;
+    } else if pointer::screen().just_released() {
+        audio::play("button_release");
+        local_state.egghead_state = false;
+    }
 }

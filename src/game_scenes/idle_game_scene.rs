@@ -469,7 +469,7 @@ pub fn input(local_state: &mut LocalState) -> () {
 
         // *** INPUT *** //
 
-        if gamepad::get(0).start.just_pressed() {
+        if pointer::screen().just_pressed() || gamepad::get(0).start.just_pressed() {
             audio::play("button_hit");
             local_state.egghead_state = true;
             if player_state_deserialized.current_xp
@@ -484,7 +484,7 @@ pub fn input(local_state: &mut LocalState) -> () {
             } else {
                 os::client::command::exec_raw(PROGRAM_ID, "increment_player_xp", &[]);
             }
-        } else if gamepad::get(0).start.just_released() {
+        } else if pointer::screen().just_released() || gamepad::get(0).start.just_released() {
             audio::play("button_release");
             local_state.egghead_state = false;
         }

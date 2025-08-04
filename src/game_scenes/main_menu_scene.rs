@@ -41,11 +41,13 @@ pub fn draw(local_state: &mut LocalState) -> () {
         sprite!("red_gogo_02", x = 150, y = 148);
     }
 
-    text!("v2.1.0", x = 315, y = 165);
+    text!("v2.2.1", x = 315, y = 165);
 }
 
 pub fn input(local_state: &mut LocalState) -> () {
-    if gamepad::get(0).start.just_pressed() && local_state.start_game == false {
+    if pointer::screen().just_pressed()
+        || gamepad::get(0).start.just_pressed() && local_state.start_game == false
+    {
         audio::play("button_hit");
         local_state.egghead_state = true;
         // create metastate
@@ -74,7 +76,7 @@ pub fn input(local_state: &mut LocalState) -> () {
             &borsh::to_vec(&enums::Factions::NoFaction).unwrap(),
         );
         local_state.start_game = true;
-    } else if gamepad::get(0).start.just_released() {
+    } else if pointer::screen().just_released() || gamepad::get(0).start.just_released() {
         audio::play("button_release");
         local_state.egghead_state = false;
     }
